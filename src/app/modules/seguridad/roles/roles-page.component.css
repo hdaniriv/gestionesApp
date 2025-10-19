@@ -1,0 +1,97 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.table-wrapper {
+  overflow: auto;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.tbl th,
+.tbl td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+.tbl th:nth-child(3),
+.tbl td:nth-child(3) {
+  /* Columna Descripción (ahora es la 3ra): permitir más espacio */
+  width: 60%;
+}
+.right {
+  text-align: right;
+}
+.options-col {
+  width: 44px;
+  text-align: left;
+}
+.tbl th.options-col,
+.tbl td.options-col {
+  position: sticky;
+  left: 0;
+  background: #fff;
+}
+.tbl th.options-col {
+  z-index: 3;
+}
+.tbl td.options-col {
+  z-index: 2;
+}
+.options-col .material-icons {
+  font-size: 18px;
+  color: #6b7280; /* gray-500 */
+  vertical-align: middle;
+  cursor: help; /* hay tooltip con title */
+}
+.options-col .material-icons:hover {
+  color: #111827; /* gray-900 */
+}
+.link {
+  background: transparent;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.link.danger {
+  color: #b00020;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.form textarea.auto-textarea {
+  width: 100%;
+  min-height: 72px;
+  line-height: 1.4;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none; /* ajustamos por JS */
+  overflow-y: hidden;
+}
+
+/* Botones con ícono + texto */
+button.btn .material-icons,
+button.btn.outline .material-icons {
+  font-size: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+/* Espaciado entre acciones del modal */
+.actions-row {
+  display: flex;
+  gap: 10px;
+}

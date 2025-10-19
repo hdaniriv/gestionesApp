@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Angular Dev Server",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "start-angular-dev-server",
+			"type": "shell",
+			"command": "npm run start",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		}
+	]
+}

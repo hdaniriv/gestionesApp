@@ -1,0 +1,75 @@
+.action-menu {
+  position: relative;
+  display: inline-block;
+}
+.icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #374151;
+}
+.menu {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  z-index: 2001;
+  padding: 6px 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+.menu.fixed {
+  position: fixed;
+  right: auto;
+  top: 0;
+  left: 0;
+}
+.item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #111827;
+  font-size: 14px;
+}
+.item:hover {
+  background: #f3f4f6;
+}
+.item.danger {
+  color: #b91c1c;
+}
+.item.danger:hover {
+  background: #fef2f2;
+}
+.material-icons {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  color: #4b5563;
+}
+.item.danger .material-icons {
+  color: #dc2626;
+}
+.label {
+  flex: 1;
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 2000;
+}

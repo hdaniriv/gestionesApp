@@ -1,0 +1,26 @@
+<section class="public">
+  <h1>Skynet</h1>
+  <p>Soporte informático, redes, sistemas operativos, correo y más.</p>
+  <div class="actions">
+    <a routerLink="/login" class="btn">Login</a>
+    <a class="btn outline" routerLink="/login">Registro de clientes</a>
+  </div>
+  <div class="dev-sim" *ngIf="isDev">
+    <h3>Simulación rápida (solo dev)</h3>
+    <div class="actions">
+      <button class="btn" (click)="loginAsAdmin()">
+        Entrar como Administrador
+      </button>
+      <button class="btn" (click)="loginAsSupervisor()">
+        Entrar como Supervisor
+      </button>
+      <button class="btn" (click)="loginAsTecnico()">
+        Entrar como Técnico
+      </button>
+      <button class="btn" (click)="loginAsCliente()">
+        Entrar como Cliente
+      </button>
+      <button class="btn outline" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</section>

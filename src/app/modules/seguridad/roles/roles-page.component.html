@@ -1,0 +1,83 @@
+<div class="toolbar">
+  <h2>Roles</h2>
+  <button class="btn" *ngIf="canEdit()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span>
+    Crear
+  </button>
+</div>
+
+<div class="alert" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+<div class="loading" *ngIf="loading()">Cargando...</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones"
+            >more_horiz</span
+          >
+        </th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of roles()">
+        <td class="options-col">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(r)"
+            (edit)="openEdit(r)"
+            (remove)="remove(r)"
+          ></app-action-menu>
+        </td>
+        <td>{{ r.nombre }}</td>
+        <td>{{ r.descripcion }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label>Nombre <input [(ngModel)]="draft.nombre" required /></label>
+    <label>
+      Descripción
+      <textarea
+        #descArea
+        class="auto-textarea"
+        rows="3"
+        [(ngModel)]="draft.descripcion"
+        (input)="autoResize($event)"
+        placeholder="Escribe la descripción..."
+      ></textarea>
+    </label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <ng-container *ngIf="draft?.nombre; else emptyDetail">
+      <p><b>Nombre:</b> {{ draft.nombre }}</p>
+      <p><b>Descripción:</b> {{ draft.descripcion }}</p>
+    </ng-container>
+    <ng-template #emptyDetail>
+      <p>Obteniendo detalle...</p>
+    </ng-template>
+  </div>
+  <div modal-actions class="actions-row">
+    <button
+      class="btn"
+      *ngIf="modalMode() !== 'view'"
+      [disabled]="loading() || !draft.nombre"
+      (click)="save()"
+    >
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cancelar
+    </button>
+  </div>
+</app-modal>

@@ -1,0 +1,33 @@
+### Node/Angular basics
+node_modules/
+dist/
+.angular/
+.cache/
+out-tsc/
+coverage/
+
+### Env / credentials
+.env
+.env.*
+
+### Logs
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log*
+
+### OS
+.DS_Store
+Thumbs.db
+
+### Editors/IDE
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### Misc
+*.local
+*.swp
+*.swo
+*.tmp
+*.log

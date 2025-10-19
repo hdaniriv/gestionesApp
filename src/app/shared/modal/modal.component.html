@@ -1,0 +1,12 @@
+<div class="overlay" *ngIf="open" (click)="backdrop($event)">
+  <div class="card" (click)="$event.stopPropagation()">
+    <header>
+      <h3>{{ title }}</h3>
+      <button class="close" (click)="close.emit()">×</button>
+    </header>
+    <section class="body"><ng-content></ng-content></section>
+    <footer>
+      <ng-content select="[modal-actions]"></ng-content>
+    </footer>
+  </div>
+</div>

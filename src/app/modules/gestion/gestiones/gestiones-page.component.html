@@ -1,0 +1,108 @@
+<div class="toolbar">
+  <h2>Gestiones</h2>
+  <button class="btn" [disabled]="!canCreate()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span>
+    Crear Gestión
+  </button>
+</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones"
+            >more_horiz</span
+          >
+        </th>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Técnico</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let g of gestiones()">
+        <td class="options-col">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(g)"
+            (edit)="openEdit(g)"
+            (remove)="remove(g)"
+          />
+        </td>
+        <td>{{ g.id }}</td>
+        <td>{{ g.idCliente }}</td>
+        <td>{{ tipoNombre(g.idTipoGestion) }}</td>
+        <td>
+          <span class="chip">{{ g.estado || "Nuevo" }}</span>
+        </td>
+        <td>{{ empleadoNombre(g.idTecnico) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label
+      >Cliente (ID)<input type="number" [(ngModel)]="draft.idCliente" required
+    /></label>
+    <label
+      >Tipo de Gestión
+      <select [(ngModel)]="draft.idTipoGestion">
+        <option *ngFor="let t of tipos()" [ngValue]="t.id">
+          {{ t.nombre }}
+        </option>
+      </select>
+    </label>
+    <label>Dirección <input [(ngModel)]="draft.direccion" required /></label>
+    <label
+      >Técnico
+      <select [(ngModel)]="draft.idTecnico">
+        <option [ngValue]="undefined">-- Sin asignar --</option>
+        <option *ngFor="let e of empleados()" [ngValue]="e.id">
+          {{ e.nombres }} {{ e.apellidos }}
+        </option>
+      </select>
+    </label>
+    <div class="grid-2">
+      <label>Latitud <input [(ngModel)]="draft.latitud" /></label>
+      <label>Longitud <input [(ngModel)]="draft.longitud" /></label>
+    </div>
+    <label
+      >Fecha programada
+      <input type="datetime-local" [(ngModel)]="draft.fechaProgramada"
+    /></label>
+    <label>Observaciones <input [(ngModel)]="draft.observaciones" /></label>
+    <label
+      >Estado
+      <input
+        [(ngModel)]="draft.estado"
+        placeholder="Nuevo/En Proceso/Finalizado"
+    /></label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <p><b>ID Cliente:</b> {{ draft.idCliente }}</p>
+    <p><b>Tipo:</b> {{ tipoNombre(draft.idTipoGestion) }}</p>
+    <p><b>Dirección:</b> {{ draft.direccion }}</p>
+    <p><b>Técnico:</b> {{ empleadoNombre(draft.idTecnico) }}</p>
+    <p><b>Lat/Long:</b> {{ draft.latitud }} , {{ draft.longitud }}</p>
+    <p><b>Programada:</b> {{ draft.fechaProgramada }}</p>
+    <p><b>Observaciones:</b> {{ draft.observaciones }}</p>
+    <p><b>Estado:</b> {{ draft.estado || "Nuevo" }}</p>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cerrar
+    </button>
+  </div>
+</app-modal>

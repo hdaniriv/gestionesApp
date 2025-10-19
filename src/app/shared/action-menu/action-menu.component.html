@@ -1,0 +1,28 @@
+<div class="action-menu" [class.open]="open">
+  <button class="icon" (click)="toggle($event)" title="Acciones">⋮</button>
+
+  <!-- Backdrop a pantalla completa para capturar clics fuera -->
+  <div class="backdrop" *ngIf="open"></div>
+
+  <!-- Menú posicionado fijo al viewport para evitar clipping en contenedores con overflow -->
+  <div
+    #menuRef
+    class="menu fixed"
+    *ngIf="open"
+    [style.top.px]="menuTop"
+    [style.left.px]="menuLeft"
+  >
+    <button class="item" *ngIf="canView" (click)="onView($event)">
+      <span class="material-icons">visibility</span>
+      <span class="label">Ver</span>
+    </button>
+    <button class="item" *ngIf="canEdit" (click)="onEdit($event)">
+      <span class="material-icons">edit</span>
+      <span class="label">Modificar</span>
+    </button>
+    <button class="item danger" *ngIf="canDelete" (click)="onRemove($event)">
+      <span class="material-icons">delete</span>
+      <span class="label">Eliminar</span>
+    </button>
+  </div>
+</div>

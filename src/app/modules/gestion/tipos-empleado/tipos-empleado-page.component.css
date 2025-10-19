@@ -1,0 +1,78 @@
+/* Iconos dentro de botones y espaciado de acciones del modal */
+button.btn .material-icons,
+button.btn.outline .material-icons {
+  font-size: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.actions-row {
+  display: flex;
+  gap: 10px;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.table-wrapper {
+  overflow: auto;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.tbl th,
+.tbl td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+.right {
+  text-align: right;
+}
+.options-col {
+  width: 44px;
+  text-align: left;
+}
+.tbl th.options-col,
+.tbl td.options-col {
+  position: sticky;
+  left: 0;
+  background: #fff;
+}
+.tbl th.options-col {
+  z-index: 3;
+}
+.tbl td.options-col {
+  z-index: 2;
+}
+.options-col .material-icons {
+  font-size: 18px;
+  color: #6b7280;
+  vertical-align: middle;
+  cursor: help;
+}
+.options-col .material-icons:hover {
+  color: #111827;
+}
+.link {
+  background: transparent;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.link.danger {
+  color: #b00020;
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}

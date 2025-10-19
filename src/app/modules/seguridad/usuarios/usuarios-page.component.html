@@ -1,0 +1,124 @@
+<div class="toolbar">
+  <h2>Usuarios</h2>
+  <button class="btn" *ngIf="canEdit()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span>
+    Crear
+  </button>
+</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones"
+            >more_horiz</span
+          >
+        </th>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of usuarios()">
+        <td class="options-col">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(u)"
+            (edit)="openEdit(u)"
+            (remove)="remove(u)"
+          ></app-action-menu>
+          <button class="link" *ngIf="canEdit()" (click)="openRoles(u)">
+            Roles
+          </button>
+        </td>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.nombre }}</td>
+        <td>{{ u.email }}</td>
+        <td><input type="checkbox" [checked]="u.activo" disabled /></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal CRUD Usuario -->
+<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label
+      >Usuario <input [(ngModel)]="draft.username" required minlength="3"
+    /></label>
+    <label>Nombre <input [(ngModel)]="draft.nombre" /></label>
+    <label>Email <input type="email" [(ngModel)]="draft.email" /></label>
+    <label>Activo <input type="checkbox" [(ngModel)]="draft.activo" /></label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <p><b>Usuario:</b> {{ draft.username }}</p>
+    <p><b>Nombre:</b> {{ draft.nombre }}</p>
+    <p><b>Email:</b> {{ draft.email }}</p>
+    <p><b>Activo:</b> {{ draft.activo ? "Sí" : "No" }}</p>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cancelar
+    </button>
+  </div>
+</app-modal>
+
+<!-- Modal Roles de Usuario -->
+<app-modal
+  [open]="rolesModalOpen()"
+  [title]="rolesModalTitle()"
+  (close)="closeRolesModal()"
+>
+  <div class="grid">
+    <div>
+      <h4>Asignados</h4>
+      <ul>
+        <li *ngFor="let r of assignedRoles()">
+          {{ r.nombre }}
+          <button
+            class="link danger"
+            *ngIf="canEdit()"
+            (click)="removeRoleFromCurrent(r)"
+          >
+            Quitar
+          </button>
+        </li>
+        <li *ngIf="assignedRoles().length === 0">Sin roles</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Disponibles</h4>
+      <ul>
+        <li *ngFor="let r of availableRoles()">
+          {{ r.nombre }}
+          <button
+            class="link"
+            *ngIf="canEdit()"
+            (click)="assignRoleToCurrent(r)"
+          >
+            Asignar
+          </button>
+        </li>
+        <li *ngIf="availableRoles().length === 0">Sin roles para asignar</li>
+      </ul>
+    </div>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn outline" (click)="closeRolesModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cerrar
+    </button>
+  </div>
+</app-modal>

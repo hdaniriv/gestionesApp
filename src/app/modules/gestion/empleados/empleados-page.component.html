@@ -1,0 +1,75 @@
+<div class="toolbar">
+  <h2>Empleados</h2>
+  <button class="btn" *ngIf="canEdit()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span>
+    Crear
+  </button>
+</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th></th>
+        <th>ID</th>
+        <th>Nombres</th>
+        <th>Apellidos</th>
+        <th>Tipo</th>
+        <th>Teléfono</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of empleados()">
+        <td class="right">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(e)"
+            (edit)="openEdit(e)"
+            (remove)="remove(e)"
+          ></app-action-menu>
+        </td>
+        <td>{{ e.id }}</td>
+        <td>{{ e.nombres }}</td>
+        <td>{{ e.apellidos }}</td>
+        <td>{{ empleadoTipoNombre(e.idEmpleadoTipo) }}</td>
+        <td>{{ e.telefono }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label>Nombres <input [(ngModel)]="draft.nombres" required /></label>
+    <label>Apellidos <input [(ngModel)]="draft.apellidos" required /></label>
+    <label
+      >Tipo de Empleado
+      <select [(ngModel)]="draft.idEmpleadoTipo">
+        <option *ngFor="let t of tipos()" [ngValue]="t.id">
+          {{ t.nombre }}
+        </option>
+      </select>
+    </label>
+    <label>Teléfono <input [(ngModel)]="draft.telefono" /></label>
+    <label>Dirección <input [(ngModel)]="draft.direccion" /></label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <p><b>Nombres:</b> {{ draft.nombres }}</p>
+    <p><b>Apellidos:</b> {{ draft.apellidos }}</p>
+    <p><b>Tipo:</b> {{ empleadoTipoNombre(draft.idEmpleadoTipo) }}</p>
+    <p><b>Teléfono:</b> {{ draft.telefono }}</p>
+    <p><b>Dirección:</b> {{ draft.direccion }}</p>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cancelar
+    </button>
+  </div>
+</app-modal>

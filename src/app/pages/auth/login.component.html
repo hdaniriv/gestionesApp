@@ -1,0 +1,15 @@
+<div class="login">
+  <h2>Acceso</h2>
+  <form (ngSubmit)="onSubmit()" #f="ngForm">
+    <label
+      >Usuario
+      <input name="username" [(ngModel)]="username" required />
+    </label>
+    <label
+      >Contraseña
+      <input name="password" [(ngModel)]="password" required type="password" />
+    </label>
+    <button type="submit" class="btn">Ingresar</button>
+  </form>
+  <a routerLink="/" class="link">Volver</a>
+</div>

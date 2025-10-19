@@ -1,0 +1,62 @@
+<div class="toolbar">
+  <h2>Tipos de Empleado</h2>
+  <button class="btn" *ngIf="canEdit()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span>
+    Crear
+  </button>
+</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones"
+            >more_horiz</span
+          >
+        </th>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of tipos()">
+        <td class="options-col">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(t)"
+            (edit)="openEdit(t)"
+            (remove)="remove(t)"
+          ></app-action-menu>
+        </td>
+        <td>{{ t.id }}</td>
+        <td>{{ t.nombre }}</td>
+        <td>{{ t.descripcion }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label>Nombre <input [(ngModel)]="draft.nombre" required /></label>
+    <label>Descripción <input [(ngModel)]="draft.descripcion" /></label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <p><b>Nombre:</b> {{ draft.nombre }}</p>
+    <p><b>Descripción:</b> {{ draft.descripcion }}</p>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cancelar
+    </button>
+  </div>
+</app-modal>

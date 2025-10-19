@@ -1,0 +1,71 @@
+<div class="layout">
+  <header>
+    <button class="burger" (click)="toggleSidebar()" aria-label="menu">
+      ☰
+    </button>
+    <div class="brand"><span class="logo">⚙️</span> Skynet</div>
+    <div class="user">
+      <span class="user-name">{{ username() || "Invitado" }}</span>
+      <ng-container *ngIf="roles().length as count">
+        <span class="roles">
+          <span class="role" *ngFor="let r of roles()">{{ r }}</span>
+        </span>
+      </ng-container>
+      <button class="refresh" title="Refrescar token" (click)="refresh()">
+        ↻
+      </button>
+      • <a routerLink="/" (click)="logout($event)">Salir</a>
+    </div>
+  </header>
+  <div class="body">
+    <aside class="side" [class.open]="sidebarOpen()">
+      <nav>
+        <h4>Gestión</h4>
+        <ul>
+          <li *ngIf="showGestion()">
+            <a routerLink="/app/gestion/gestiones" routerLinkActive="active"
+              >Gestiones</a
+            >
+          </li>
+        </ul>
+        <h4 *ngIf="showAdmin()">Administración</h4>
+        <ul *ngIf="showAdmin()">
+          <li>
+            <a routerLink="/app/gestion/tipos-gestion" routerLinkActive="active"
+              >Tipos de Gestión</a
+            >
+          </li>
+          <li>
+            <a routerLink="/app/gestion/empleados" routerLinkActive="active"
+              >Empleados</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/app/gestion/tipos-empleado"
+              routerLinkActive="active"
+              >Tipos de Empleado</a
+            >
+          </li>
+          <li *ngIf="showUsuarios()">
+            <a routerLink="/app/seguridad/usuarios" routerLinkActive="active"
+              >Usuarios</a
+            >
+          </li>
+          <li *ngIf="showRoles()">
+            <a routerLink="/app/seguridad/roles" routerLinkActive="active"
+              >Roles</a
+            >
+          </li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+  <footer>
+    Universidad Mariano Galvez, Facultad de Ingeniería en Sistemas — Derechos
+    reservados 2025
+  </footer>
+</div>
