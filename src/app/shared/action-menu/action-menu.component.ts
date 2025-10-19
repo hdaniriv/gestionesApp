@@ -24,11 +24,14 @@ export class ActionMenuComponent {
   @Input() canRoles = false;
   // Acción opcional: cambiar contraseña (p.ej., para el usuario actual)
   @Input() canChangePassword = false;
+  // Acción opcional: resetear contraseña (solo admin en pantalla Usuarios)
+  @Input() canResetPassword = false;
   @Output() view = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
   @Output() remove = new EventEmitter<void>();
   @Output() roles = new EventEmitter<void>();
   @Output() changePassword = new EventEmitter<void>();
+  @Output() resetPassword = new EventEmitter<void>();
 
   open = false;
   menuTop = 0;
@@ -119,6 +122,11 @@ export class ActionMenuComponent {
   onChangePassword(ev: Event) {
     ev.stopPropagation();
     this.changePassword.emit();
+    this.open = false;
+  }
+  onResetPassword(ev: Event) {
+    ev.stopPropagation();
+    this.resetPassword.emit();
     this.open = false;
   }
 

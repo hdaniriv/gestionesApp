@@ -36,5 +36,13 @@
       <span class="material-icons">lock_reset</span>
       <span class="label">Cambiar contraseña</span>
     </button>
+    <button
+      class="item"
+      *ngIf="canResetPassword"
+      (click)="onResetPassword($event)"
+    >
+      <span class="material-icons">password</span>
+      <span class="label">Resetear contraseña</span>
+    </button>
   </div>
 </div>

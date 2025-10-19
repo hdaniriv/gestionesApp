@@ -10,6 +10,11 @@ import {
   ChangePasswordDialogComponent,
   ChangePasswordPayload,
 } from "../../../shared/change-password-dialog/change-password-dialog.component";
+import { NotifyService } from "../../../shared/notify/notify.service";
+import {
+  ResetPasswordDialogComponent,
+  ResetPasswordPayload,
+} from "../../../shared/reset-password-dialog/reset-password-dialog.component";
 
 interface Usuario {
   id?: number;
@@ -33,6 +38,7 @@ interface Rol {
     ModalComponent,
     ActionMenuComponent,
     ChangePasswordDialogComponent,
+    ResetPasswordDialogComponent,
   ],
   templateUrl: "./usuarios-page.component.html",
   styleUrls: ["./usuarios-page.component.css"],
@@ -40,11 +46,16 @@ interface Rol {
 export class UsuariosPageComponent implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
+  private notify = inject(NotifyService);
   usuarios = signal<Usuario[]>([]);
   modalOpen = signal(false);
   modalMode = signal<"create" | "edit" | "view">("create");
   modalTitle = signal("");
   draft: Usuario = { username: "", nombre: "", email: "", activo: true };
+  // Campos exclusivos para creación
+  createPassword = "";
+  createPassword2 = "";
+  createRoleId: number | null = null;
   // Roles
   allRoles = signal<Rol[]>([]);
   currentUser = signal<Usuario | null>(null);
@@ -56,6 +67,9 @@ export class UsuariosPageComponent implements OnInit {
   // UI cambio de contraseña
   changePwdOpen = signal(false);
   changePwdUser: Usuario | null = null;
+  // Reset password (solo admin desde pantalla Usuarios)
+  resetPwdOpen = signal(false);
+  resetPwdUser: Usuario | null = null;
 
   canEdit() {
     return this.auth.hasRole("Administrador");
@@ -81,7 +95,11 @@ export class UsuariosPageComponent implements OnInit {
     this.modalMode.set("create");
     this.modalTitle.set("Crear Usuario");
     this.draft = { username: "", nombre: "", email: "", activo: true };
-    this.modalOpen.set(true);
+    this.createPassword = "";
+    this.createPassword2 = "";
+    this.createRoleId = null;
+    // abrir en el siguiente tick para evitar autocompletado agresivo
+    setTimeout(() => this.modalOpen.set(true), 0);
   }
   openEdit(u: Usuario) {
     this.modalMode.set("edit");
@@ -97,28 +115,79 @@ export class UsuariosPageComponent implements OnInit {
   }
   closeModal() {
     this.modalOpen.set(false);
+    this.createPassword = "";
+    this.createPassword2 = "";
+    this.createRoleId = null;
+  }
+  canSubmitCreate() {
+    return (
+      (this.draft.username?.trim().length || 0) >= 3 &&
+      this.createPassword.length >= 6 &&
+      this.createPassword === this.createPassword2 &&
+      !!this.createRoleId
+    );
   }
   async save() {
     if (this.modalMode() === "create") {
-      const body: any = {
-        username: this.draft.username,
-        nombre: this.draft.nombre,
-        email: this.draft.email,
-        password: "Temporal123*",
-      };
-      await firstValueFrom(this.api.post("/usuarios", body));
+      if (!this.canSubmitCreate()) {
+        this.notify.warning(
+          "Completa los datos: usuario, contraseña y rol (las contraseñas deben coincidir)"
+        );
+        return;
+      }
+      try {
+        const body: any = {
+          username: this.draft.username?.trim(),
+          nombre: this.draft.nombre?.trim(),
+          email: this.draft.email?.trim(),
+          password: this.createPassword,
+        };
+        const created = await firstValueFrom(this.api.post<Usuario & { id: number }>("/usuarios", body));
+        // Asignar rol obligatorio dentro de un try/catch separado para reportar claro
+        try {
+          await firstValueFrom(
+            this.api.post("/usuarios/assign-role", {
+              idUsuario: created.id,
+              idRol: this.createRoleId,
+            })
+          );
+          this.notify.success("Usuario creado y rol asignado");
+        } catch (e: any) {
+          this.notify.warning(
+            e?.error?.message || "Usuario creado, pero falló la asignación de rol"
+          );
+        }
+      } catch (e: any) {
+        this.notify.error(e?.error?.message || "Error al crear usuario");
+        return;
+      }
     } else if (this.modalMode() === "edit" && this.draft.id) {
-      const { id, username, ...rest } = this.draft as Required<Usuario>;
-      await firstValueFrom(this.api.patch(`/usuarios/${id}`, rest));
+      try {
+        const { id, username, ...rest } = this.draft as Required<Usuario>;
+        await firstValueFrom(this.api.patch(`/usuarios/${id}`, rest));
+        this.notify.success("Usuario actualizado");
+      } catch (e: any) {
+        this.notify.error(e?.error?.message || "Error al actualizar usuario");
+        return;
+      }
     }
     await this.load();
     this.closeModal();
   }
   async remove(u: Usuario) {
     if (!u.id) return;
-    if (!confirm("¿Eliminar usuario?")) return;
-    await firstValueFrom(this.api.delete(`/usuarios/${u.id}`));
-    await this.load();
+    const ok = await this.notify.confirm(
+      `¿Eliminar al usuario ${u.username}?`,
+      "Confirmar eliminación"
+    );
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.api.delete(`/usuarios/${u.id}`));
+      await this.load();
+      this.notify.success("Usuario eliminado");
+    } catch (e: any) {
+      this.notify.error(e?.error?.message || "Error al eliminar usuario");
+    }
   }
 
   // Cambiar contraseña (usa endpoint que opera sobre el usuario autenticado)
@@ -137,10 +206,38 @@ export class UsuariosPageComponent implements OnInit {
   async submitChangePassword(payload: ChangePasswordPayload) {
     try {
       await firstValueFrom(this.api.post(`/usuarios/change-password`, payload));
-      alert("Contraseña actualizada correctamente");
+      this.notify.success("Contraseña actualizada correctamente");
       this.closeChangePassword();
     } catch (e: any) {
-      alert(e?.error?.message || "Error cambiando la contraseña");
+      this.notify.error(
+        e?.error?.message || "Error cambiando la contraseña"
+      );
+    }
+  }
+
+  // Reset password (admin -> usuario seleccionado)
+  openResetPassword(u: Usuario) {
+    if (!this.canEdit()) return;
+    this.resetPwdUser = u;
+    this.resetPwdOpen.set(true);
+  }
+  closeResetPassword() {
+    this.resetPwdOpen.set(false);
+    this.resetPwdUser = null;
+  }
+  async submitResetPassword(payload: ResetPasswordPayload) {
+    const u = this.resetPwdUser;
+    if (!u?.id) return;
+    try {
+      await firstValueFrom(
+        this.api.post(`/usuarios/${u.id}/reset-password`, payload)
+      );
+      this.notify.success(`Contraseña reseteada para ${u.username}`);
+      this.closeResetPassword();
+    } catch (e: any) {
+      this.notify.error(
+        e?.error?.message || "Error reseteando la contraseña"
+      );
     }
   }
 

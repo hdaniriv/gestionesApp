@@ -1,0 +1,30 @@
+.notify-wrap {
+  position: fixed;
+  right: 16px;
+  top: 16px;
+  display: grid;
+  gap: 10px;
+  z-index: 1200;
+}
+.toast {
+  min-width: 320px;
+  max-width: 420px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  color: #111;
+  background: #fff;
+  border-left: 6px solid transparent;
+}
+.toast.info { border-left-color: #3b82f6; }
+.toast.success { border-left-color: #10b981; }
+.toast.warning { border-left-color: #f59e0b; }
+.toast.error { border-left-color: #ef4444; }
+.header { display: flex; justify-content: space-between; align-items: center; }
+.title { font-weight: 700; }
+.close { border: none; background: transparent; font-size: 18px; cursor: pointer; }
+.body { margin-top: 6px; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+.btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+.btn.primary { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+.btn.danger { background: #ef4444; color: #fff; border-color: #ef4444; }

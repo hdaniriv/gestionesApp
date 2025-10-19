@@ -1,0 +1,29 @@
+<div class="notify-wrap">
+  <div
+    class="toast"
+    *ngFor="let m of list()"
+    [class.info]="m.level === 'info'"
+    [class.success]="m.level === 'success'"
+    [class.warning]="m.level === 'warning'"
+    [class.error]="m.level === 'error'"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="header">
+      <strong class="title">{{ m.title || 'Notificación' }}</strong>
+      <button class="close" (click)="onClose(m.id)" aria-label="Cerrar">×</button>
+    </div>
+    <div class="body">{{ m.message }}</div>
+    <div class="actions" *ngIf="m.actions?.length">
+      <button
+        *ngFor="let a of m.actions"
+        class="btn"
+        [class.primary]="a.kind === 'primary'"
+        [class.danger]="a.kind === 'danger'"
+        (click)="onAction(m.id, a.value)"
+      >
+        {{ a.label }}
+      </button>
+    </div>
+  </div>
+</div>

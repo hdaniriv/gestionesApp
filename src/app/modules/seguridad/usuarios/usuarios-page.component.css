@@ -85,6 +85,22 @@ button.btn.outline .material-icons {
   border: 1px solid #ccc;
   border-radius: 6px;
 }
+.form select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+.hint.error {
+  color: #b00020;
+  font-size: 12px;
+}
+.reqs {
+  margin: 4px 0 0 0;
+  padding-left: 18px;
+  color: #b00020;
+  font-size: 12px;
+}
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

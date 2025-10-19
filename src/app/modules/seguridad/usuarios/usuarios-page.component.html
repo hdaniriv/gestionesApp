@@ -30,14 +30,14 @@
             [canEdit]="canEdit()"
             [canDelete]="canDelete()"
             [canRoles]="canEdit()"
-            [canChangePassword]="
-              canEdit() || auth.userSig()?.username === u.username
-            "
+            [canChangePassword]="auth.userSig()?.username === u.username"
+            [canResetPassword]="canEdit()"
             (view)="openView(u)"
             (edit)="openEdit(u)"
             (remove)="remove(u)"
             (roles)="openRoles(u)"
             (changePassword)="openChangePassword(u)"
+            (resetPassword)="openResetPassword(u)"
           ></app-action-menu>
         </td>
         <td>{{ u.username }}</td>
@@ -59,13 +59,49 @@
 
 <!-- Modal CRUD Usuario -->
 <app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
-  <div *ngIf="modalMode() !== 'view'" class="form">
+  <div *ngIf="modalMode() !== 'view'" class="form" autocomplete="off">
     <label
-      >Usuario <input [(ngModel)]="draft.username" required minlength="3"
+      >Usuario <input [(ngModel)]="draft.username" required minlength="3" autocomplete="off" autocapitalize="off" spellcheck="false" name="create-username"
     /></label>
-    <label>Nombre <input [(ngModel)]="draft.nombre" /></label>
-    <label>Email <input type="email" [(ngModel)]="draft.email" /></label>
+    <label>Nombre <input [(ngModel)]="draft.nombre" autocomplete="off" name="create-nombre" /></label>
+    <label>Email <input type="email" [(ngModel)]="draft.email" autocomplete="off" name="create-email" /></label>
     <label>Activo <input type="checkbox" [(ngModel)]="draft.activo" /></label>
+
+    <!-- Campos adicionales solo para creación -->
+    <ng-container *ngIf="modalMode() === 'create'">
+      <label>
+        Nueva contraseña
+        <input type="password" [(ngModel)]="createPassword" minlength="6" required autocomplete="new-password" name="create-password" />
+      </label>
+      <div *ngIf="createPassword && createPassword.length < 6" class="hint error">
+        La contraseña debe tener al menos 6 caracteres
+      </div>
+      <label>
+        Confirmar contraseña
+        <input type="password" [(ngModel)]="createPassword2" minlength="6" required autocomplete="new-password" name="create-password-confirm" />
+      </label>
+      <div *ngIf="createPassword && createPassword2 && createPassword !== createPassword2" class="hint error">
+        Las contraseñas no coinciden
+      </div>
+      <label>
+        Rol inicial
+        <select [(ngModel)]="createRoleId" required>
+          <option [ngValue]="null" disabled selected>Selecciona un rol…</option>
+          <option *ngFor="let r of allRoles()" [ngValue]="r.id">{{ r.nombre }}</option>
+        </select>
+      </label>
+      <div *ngIf="createRoleId === null" class="hint error">
+        Debes seleccionar un rol para el usuario
+      </div>
+
+      <!-- Requisitos mínimos -->
+      <ul class="reqs" *ngIf="!canSubmitCreate()">
+        <li *ngIf="!draft.username || draft.username.trim().length < 3">Usuario: mínimo 3 caracteres</li>
+        <li *ngIf="!createPassword || createPassword.length < 6">Contraseña: mínimo 6 caracteres</li>
+        <li *ngIf="createPassword && createPassword2 && createPassword !== createPassword2">Las contraseñas deben coincidir</li>
+        <li *ngIf="createRoleId === null">Selecciona un rol inicial</li>
+      </ul>
+    </ng-container>
   </div>
   <div *ngIf="modalMode() === 'view'">
     <p><b>Usuario:</b> {{ draft.username }}</p>
@@ -74,7 +110,12 @@
     <p><b>Activo:</b> {{ draft.activo ? "Sí" : "No" }}</p>
   </div>
   <div modal-actions class="actions-row">
-    <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
+    <button
+      class="btn"
+      *ngIf="modalMode() !== 'view'"
+      [disabled]="modalMode() === 'create' && !canSubmitCreate()"
+      (click)="save()"
+    >
       <span class="material-icons" aria-hidden="true">save</span>
       Guardar
     </button>
@@ -91,6 +132,14 @@
   [title]="'Cambiar contraseña de ' + (changePwdUser?.username || '')"
   (close)="closeChangePassword()"
   (submit)="submitChangePassword($event)"
+/>
+
+<!-- Modal Resetear Contraseña (solo admin) -->
+<app-reset-password-dialog
+  [open]="resetPwdOpen()"
+  [title]="'Resetear contraseña de ' + (resetPwdUser?.username || '')"
+  (close)="closeResetPassword()"
+  (submit)="submitResetPassword($event)"
 />
 
 <!-- Modal Roles de Usuario -->
