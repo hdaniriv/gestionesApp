@@ -15,6 +15,8 @@ import { firstValueFrom } from "rxjs";
 export class LoginComponent {
   username = "";
   password = "";
+  isHuman = false;
+  showPassword = false;
   constructor(
     private router: Router,
     private api: ApiService,
@@ -22,6 +24,9 @@ export class LoginComponent {
   ) {}
   async onSubmit() {
     try {
+      if (!this.isHuman) {
+        return; // Protector simple del submit si no marca "No soy robot"
+      }
       const res: any = await firstValueFrom(
         this.api.post("/auth/login", {
           username: this.username,
@@ -37,5 +42,9 @@ export class LoginComponent {
     } catch (e) {
       alert("Credenciales inválidas");
     }
+  }
+
+  toggleShowPassword() {
+    this.showPassword = !this.showPassword;
   }
 }

@@ -5,16 +5,35 @@
     </button>
     <div class="brand"><span class="logo">⚙️</span> Skynet</div>
     <div class="user">
-      <span class="user-name">{{ username() || "Invitado" }}</span>
-      <ng-container *ngIf="roles().length as count">
-        <span class="roles">
-          <span class="role" *ngFor="let r of roles()">{{ r }}</span>
-        </span>
-      </ng-container>
-      <button class="refresh" title="Refrescar token" (click)="refresh()">
-        ↻
+      <button class="user-btn" (click)="toggleUserMenu($event)">
+        <span class="material-icons" aria-hidden="true">account_circle</span>
+        <span class="user-name">{{ username() || "Invitado" }}</span>
+        <span class="material-icons" aria-hidden="true">expand_more</span>
       </button>
-      • <a routerLink="/" (click)="logout($event)">Salir</a>
+      <div
+        class="user-menu"
+        *ngIf="userMenuOpen()"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="menu-header">
+          Conectado como <b>{{ username() }}</b>
+        </div>
+        <div class="menu-sub" *ngIf="roles()?.length">
+          <span class="role-chip" *ngFor="let r of roles()">{{ r }}</span>
+        </div>
+        <button class="item" (click)="openChangePassword()">
+          <span class="material-icons">lock_reset</span>
+          Cambiar contraseña
+        </button>
+        <button class="item" (click)="refresh()">
+          <span class="material-icons">refresh</span>
+          Refrescar token
+        </button>
+        <button class="item danger" (click)="logout($event)">
+          <span class="material-icons">logout</span>
+          Salir
+        </button>
+      </div>
     </div>
   </header>
   <div class="body">
@@ -68,4 +87,11 @@
     Universidad Mariano Galvez, Facultad de Ingeniería en Sistemas — Derechos
     reservados 2025
   </footer>
+
+  <!-- Modal Cambiar Contraseña (reutilizado) -->
+  <app-change-password-dialog
+    [open]="changePwdOpen()"
+    (close)="closeChangePassword()"
+    (submit)="submitChangePassword($event)"
+  />
 </div>

@@ -20,9 +20,15 @@ export class ActionMenuComponent {
   @Input() canView = true;
   @Input() canEdit = false;
   @Input() canDelete = false;
+  // Acción opcional exclusiva para la pantalla de Usuarios
+  @Input() canRoles = false;
+  // Acción opcional: cambiar contraseña (p.ej., para el usuario actual)
+  @Input() canChangePassword = false;
   @Output() view = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
   @Output() remove = new EventEmitter<void>();
+  @Output() roles = new EventEmitter<void>();
+  @Output() changePassword = new EventEmitter<void>();
 
   open = false;
   menuTop = 0;
@@ -103,6 +109,16 @@ export class ActionMenuComponent {
   onRemove(ev: Event) {
     ev.stopPropagation();
     this.remove.emit();
+    this.open = false;
+  }
+  onRoles(ev: Event) {
+    ev.stopPropagation();
+    this.roles.emit();
+    this.open = false;
+  }
+  onChangePassword(ev: Event) {
+    ev.stopPropagation();
+    this.changePassword.emit();
     this.open = false;
   }
 

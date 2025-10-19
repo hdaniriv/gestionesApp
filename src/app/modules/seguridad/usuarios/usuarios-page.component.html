@@ -15,11 +15,11 @@
             >more_horiz</span
           >
         </th>
-        <th>ID</th>
         <th>Usuario</th>
         <th>Nombre</th>
         <th>Email</th>
         <th>Activo</th>
+        <th>Roles</th>
       </tr>
     </thead>
     <tbody>
@@ -29,19 +29,29 @@
             [canView]="true"
             [canEdit]="canEdit()"
             [canDelete]="canDelete()"
+            [canRoles]="canEdit()"
+            [canChangePassword]="
+              canEdit() || auth.userSig()?.username === u.username
+            "
             (view)="openView(u)"
             (edit)="openEdit(u)"
             (remove)="remove(u)"
+            (roles)="openRoles(u)"
+            (changePassword)="openChangePassword(u)"
           ></app-action-menu>
-          <button class="link" *ngIf="canEdit()" (click)="openRoles(u)">
-            Roles
-          </button>
         </td>
-        <td>{{ u.id }}</td>
         <td>{{ u.username }}</td>
         <td>{{ u.nombre }}</td>
         <td>{{ u.email }}</td>
         <td><input type="checkbox" [checked]="u.activo" disabled /></td>
+        <td class="roles-col">
+          <ng-container *ngIf="rolesFor(u)?.length; else noRoles">
+            <span *ngFor="let r of rolesFor(u); let last = last">
+              {{ r }}<span class="sep" *ngIf="!last"> | </span>
+            </span>
+          </ng-container>
+          <ng-template #noRoles>-</ng-template>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -74,6 +84,14 @@
     </button>
   </div>
 </app-modal>
+
+<!-- Modal Cambiar Contraseña (reutilizado) -->
+<app-change-password-dialog
+  [open]="changePwdOpen()"
+  [title]="'Cambiar contraseña de ' + (changePwdUser?.username || '')"
+  (close)="closeChangePassword()"
+  (submit)="submitChangePassword($event)"
+/>
 
 <!-- Modal Roles de Usuario -->
 <app-modal

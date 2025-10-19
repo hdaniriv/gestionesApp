@@ -28,6 +28,15 @@ button.btn.outline .material-icons {
   padding: 8px 10px;
   border-bottom: 1px solid #eee;
 }
+/* Columna roles al final */
+.tbl th:last-child,
+.tbl td.roles-col {
+  white-space: nowrap;
+  color: #374151;
+}
+.tbl td.roles-col .sep {
+  color: #9ca3af; /* gris separador */
+}
 .right {
   text-align: right;
 }
