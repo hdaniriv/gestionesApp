@@ -17,7 +17,7 @@ import { ApiService } from "../../core/api.service";
 
 @Component({
   standalone: true,
-  selector: "app-dashboard",
+  selector: "app-mainpage",
   imports: [
     CommonModule,
     RouterOutlet,
@@ -25,10 +25,10 @@ import { ApiService } from "../../core/api.service";
     FormsModule,
     ChangePasswordDialogComponent,
   ],
-  templateUrl: "./dashboard.component.html",
-  styleUrls: ["./dashboard.component.css"],
+  templateUrl: "./mainpage.component.html",
+  styleUrls: ["./mainpage.component.css"],
 })
-export class DashboardComponent {
+export class mainpageComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private api = inject(ApiService);

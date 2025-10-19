@@ -18,15 +18,15 @@ export const routes: Routes = [
   {
     path: "app",
     loadComponent: () =>
-      import("./pages/dashboard/dashboard.component").then(
-        (m) => m.DashboardComponent
+      import("./pages/mainpage/mainpage.component").then(
+        (m) => m.mainpageComponent
       ),
     canActivate: [authGuard],
     children: [
       {
         path: "",
         loadComponent: () =>
-          import("./pages/dashboard/welcome.component").then(
+          import("./pages/mainpage/welcome.component").then(
             (m) => m.WelcomeComponent
           ),
       },
