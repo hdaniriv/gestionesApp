@@ -6,6 +6,47 @@
   </button>
 </div>
 
+<div class="filters-toggle" style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+  <button class="btn outline" (click)="toggleFilters()">
+    <span class="material-icons" aria-hidden="true">{{ filtersOpen ? 'expand_less' : 'expand_more' }}</span>
+    Filtros
+  </button>
+  <button class="btn" (click)="applyFilters()">Aplicar</button>
+  <button class="btn" (click)="clearFilters()" [disabled]="!hasAnyFilter()">Limpiar</button>
+  <span *ngIf="hasAnyFilter()" style="opacity:.7;">Filtros activos</span>
+  <span style="flex:1 1 auto"></span>
+</div>
+
+<div *ngIf="filtersOpen" class="filters" style="display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-bottom:12px;">
+  <div style="grid-column: span 2; display:flex; gap:12px; align-items:end;">
+    <label style="flex:1;">Desde
+      <input type="date" [(ngModel)]="filtros.desde" />
+    </label>
+    <label style="flex:1;">Hasta
+      <input type="date" [(ngModel)]="filtros.hasta" />
+    </label>
+  </div>
+  <label>Tipo de Gestión
+    <select [(ngModel)]="filtros.idTipoGestion">
+      <option [ngValue]="undefined">-- Todos --</option>
+      <option *ngFor="let t of tipos()" [ngValue]="t.id">{{ t.nombre }}</option>
+    </select>
+  </label>
+  <label>Estado
+    <select [(ngModel)]="filtros.estado">
+      <option [ngValue]="undefined">-- Todos --</option>
+      <option *ngFor="let e of estadosPosibles" [ngValue]="e">{{ e }}</option>
+    </select>
+  </label>
+  <label>Asignación
+    <select [(ngModel)]="filtros.asignacion">
+      <option [ngValue]="undefined">-- Todas --</option>
+      <option [ngValue]="'sin-tecnico'">Sin técnico</option>
+      <option [ngValue]="'con-tecnico'">Con técnico</option>
+    </select>
+  </label>
+</div>
+
 <div class="table-wrapper">
   <table class="tbl">
     <thead>
@@ -15,11 +56,14 @@
             >more_horiz</span
           >
         </th>
-        <th>ID</th>
+        <th>Fecha</th>
+        <th>NIT</th>
         <th>Cliente</th>
+        <th>Dirección</th>
         <th>Tipo</th>
         <th>Estado</th>
-        <th>Técnico</th>
+        <th>Técnico asignado</th>
+        <th>Observaciones</th>
       </tr>
     </thead>
     <tbody>
@@ -29,71 +73,154 @@
             [canView]="true"
             [canEdit]="canEdit()"
             [canDelete]="canDelete()"
+            [canAssign]="canAsignar()"
             (view)="openView(g)"
             (edit)="openEdit(g)"
             (remove)="remove(g)"
+            (assign)="openAsignacion(g)"
           />
         </td>
-        <td>{{ g.id }}</td>
-        <td>{{ g.idCliente }}</td>
+        <td>
+          {{ (g.fechaProgramada || g.fechaInicio || g.fechaFin)
+              ? ((g.fechaProgramada || g.fechaInicio || g.fechaFin) | dt)
+              : '-' }}
+        </td>
+        <td>{{ clienteNitById(g.idCliente) }}</td>
+        <td>{{ clienteNombreById(g.idCliente) }}</td>
+        <td>{{ g.direccion }}</td>
         <td>{{ tipoNombre(g.idTipoGestion) }}</td>
         <td>
-          <span class="chip">{{ g.estado || "Nuevo" }}</span>
+          <span class="chip estado-text"
+                [ngClass]="{
+                  'estado-nuevo': computeEstadoDisplay(g) === 'Nuevo',
+                  'estado-pendiente': computeEstadoDisplay(g) === 'Pendiente',
+                  'estado-asignado': computeEstadoDisplay(g) === 'Asignado',
+                  'estado-en-proceso': computeEstadoDisplay(g) === 'En Proceso',
+                  'estado-finalizado': computeEstadoDisplay(g) === 'Finalizado'
+                }">{{ computeEstadoDisplay(g) }}</span>
         </td>
         <td>{{ empleadoNombre(g.idTecnico) }}</td>
+        <td>{{ g.observaciones || '' }}</td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
+<app-modal [open]="modalOpen()" [title]="modalTitle()" [size]="'xl'" (close)="closeModal()">
   <div *ngIf="modalMode() !== 'view'" class="form">
-    <label
-      >Cliente (ID)<input type="number" [(ngModel)]="draft.idCliente" required
-    /></label>
+    <ng-container *ngIf="auth.hasRole('Cliente'); else clienteSelectBlock">
+      <div class="grid-2">
+        <label>Cliente
+          <input [value]="selfCliente?.nombre || '—'" disabled />
+        </label>
+        <label>NIT
+          <input [value]="selfCliente?.nit || '—'" disabled />
+        </label>
+      </div>
+    </ng-container>
+    <ng-template #clienteSelectBlock>
+      <label>Cliente
+        <select [(ngModel)]="draft.idCliente" (ngModelChange)="onClienteChange($event)" required>
+          <option [ngValue]="0">-- Selecciona un cliente --</option>
+          <option *ngFor="let c of clientes()" [ngValue]="c.id">
+            {{ c.nombre }}{{ c.nit ? ' (' + c.nit + ')' : '' }}
+          </option>
+        </select>
+      </label>
+    </ng-template>
     <label
       >Tipo de Gestión
-      <select [(ngModel)]="draft.idTipoGestion">
+      <select [(ngModel)]="draft.idTipoGestion" required>
+        <option [ngValue]="0">-- Selecciona un tipo --</option>
         <option *ngFor="let t of tipos()" [ngValue]="t.id">
           {{ t.nombre }}
         </option>
       </select>
     </label>
     <label>Dirección <input [(ngModel)]="draft.direccion" required /></label>
-    <label
-      >Técnico
-      <select [(ngModel)]="draft.idTecnico">
-        <option [ngValue]="undefined">-- Sin asignar --</option>
-        <option *ngFor="let e of empleados()" [ngValue]="e.id">
-          {{ e.nombres }} {{ e.apellidos }}
-        </option>
-      </select>
-    </label>
+    <ng-container *ngIf="!(auth.hasRole('Cliente')); else noTecnico">
+      <label
+        >Técnico
+        <select [(ngModel)]="draft.idTecnico">
+          <option [ngValue]="undefined">-- Sin asignar --</option>
+          <option *ngFor="let e of empleados()" [ngValue]="e.id">
+            {{ e.nombres }} {{ e.apellidos }}
+          </option>
+        </select>
+      </label>
+    </ng-container>
+    <ng-template #noTecnico>
+      <label>Técnico
+        <input disabled [value]="'No asignado'" />
+      </label>
+    </ng-template>
     <div class="grid-2">
       <label>Latitud <input [(ngModel)]="draft.latitud" /></label>
       <label>Longitud <input [(ngModel)]="draft.longitud" /></label>
     </div>
-    <label
-      >Fecha programada
-      <input type="datetime-local" [(ngModel)]="draft.fechaProgramada"
-    /></label>
-    <label>Observaciones <input [(ngModel)]="draft.observaciones" /></label>
-    <label
-      >Estado
+    <div class="full-row">
+      <app-map-picker
+        [lat]="draft.latitud ? +draft.latitud : undefined"
+        [lng]="draft.longitud ? +draft.longitud : undefined"
+        (changed)="onMapChanged($event)"
+      ></app-map-picker>
+      <small>Lat: {{ draft.latitud || '-' }} | Lng: {{ draft.longitud || '-' }}</small>
+    </div>
+    <label>
+      Fecha programada
       <input
-        [(ngModel)]="draft.estado"
-        placeholder="Nuevo/En Proceso/Finalizado"
-    /></label>
+        type="datetime-local"
+        [ngModel]="toInputDateTime(draft.fechaProgramada)"
+        (ngModelChange)="draft.fechaProgramada = $event"
+      />
+    </label>
+    <label>Observaciones <input [(ngModel)]="draft.observaciones" /></label>
+    <label>Estado
+      <input [value]="computeEstadoDisplay(draft)" disabled />
+    </label>
+    <div class="full-row" style="grid-column: 1 / -1; margin-top: 8px;">
+      <hr />
+      <div class="grid-2">
+        <label>Fecha de creación
+          <input [value]="(draft.fechaCreacion | dt) || '—'" disabled />
+        </label>
+        <label>Fecha de modificación
+          <input [value]="(draft.fechaModificacion | dt) || '—'" disabled />
+        </label>
+      </div>
+      <label>Usuario que creó
+        <input [value]="draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '—'" disabled />
+      </label>
+    </div>
   </div>
   <div *ngIf="modalMode() === 'view'">
-    <p><b>ID Cliente:</b> {{ draft.idCliente }}</p>
+  <p><b>Cliente:</b> {{ clienteNombreNitById(draft.idCliente) }}</p>
     <p><b>Tipo:</b> {{ tipoNombre(draft.idTipoGestion) }}</p>
     <p><b>Dirección:</b> {{ draft.direccion }}</p>
     <p><b>Técnico:</b> {{ empleadoNombre(draft.idTecnico) }}</p>
-    <p><b>Lat/Long:</b> {{ draft.latitud }} , {{ draft.longitud }}</p>
-    <p><b>Programada:</b> {{ draft.fechaProgramada }}</p>
+  <p><b>Lat/Long:</b> {{ draft.latitud }} , {{ draft.longitud }}</p>
+  <p><b>Programada:</b> {{ draft.fechaProgramada | dt }}</p>
+    <p><b>Inicio:</b>
+      {{ draft.fechaInicio ? (draft.fechaInicio | dt) : '-' }}
+    </p>
+    <p><b>Fin:</b>
+      {{ draft.fechaFin ? (draft.fechaFin | dt) : '-' }}
+    </p>
     <p><b>Observaciones:</b> {{ draft.observaciones }}</p>
-    <p><b>Estado:</b> {{ draft.estado || "Nuevo" }}</p>
+    <p><b>Estado:</b>
+      <span class="estado-text"
+            [ngClass]="{
+              'estado-nuevo': computeEstadoDisplay(draft) === 'Nuevo',
+              'estado-pendiente': computeEstadoDisplay(draft) === 'Pendiente',
+              'estado-asignado': computeEstadoDisplay(draft) === 'Asignado',
+              'estado-en-proceso': computeEstadoDisplay(draft) === 'En Proceso',
+              'estado-finalizado': computeEstadoDisplay(draft) === 'Finalizado'
+            }">{{ computeEstadoDisplay(draft) }}</span>
+    </p>
+    <hr />
+  <p><b>Creado:</b> {{ draft.fechaCreacion ? (draft.fechaCreacion | dt) : '-' }}</p>
+  <p><b>Modificado:</b> {{ draft.fechaModificacion ? (draft.fechaModificacion | dt) : '-' }}</p>
+    <p><b>Usuario creador (ID):</b> {{ draft.idUsuarioCreador || '-' }}</p>
   </div>
   <div modal-actions class="actions-row">
     <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">
@@ -104,5 +231,27 @@
       <span class="material-icons" aria-hidden="true">close</span>
       Cerrar
     </button>
+  </div>
+</app-modal>
+
+<!-- Popup Asignación / Fechas -->
+<app-modal [open]="asignacionOpen()" [title]="'Asignación y Fechas'" (close)="closeAsignacion()">
+  <div class="form">
+    <label>Técnico
+      <select [(ngModel)]="asignacionDraft.idTecnico" [disabled]="auth.hasRole('Cliente')">
+        <option [ngValue]="undefined">-- Sin asignar --</option>
+        <option *ngFor="let e of empleados()" [ngValue]="e.id">{{ e.nombres }} {{ e.apellidos }}</option>
+      </select>
+    </label>
+    <label>Fecha de inicio
+      <input type="datetime-local" [(ngModel)]="asignacionDraft.fechaInicio" />
+    </label>
+    <label>Fecha de fin
+      <input type="datetime-local" [(ngModel)]="asignacionDraft.fechaFin" />
+    </label>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" (click)="saveAsignacion()"><span class="material-icons">save</span> Guardar</button>
+    <button class="btn outline" (click)="closeAsignacion()"><span class="material-icons">close</span> Cerrar</button>
   </div>
 </app-modal>

@@ -66,29 +66,23 @@ button.btn.outline .material-icons {
 .link.danger {
   color: #b00020;
 }
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-select,
-input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.form label { display: flex; flex-direction: column; gap: 6px; }
+select, input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width: 100%; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .chip {
   background: #eee;
   padding: 2px 8px;
   border-radius: 10px;
 }
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+/* Colores por estado (texto en negrita) */
+.estado-text { font-weight: 700; }
+.estado-nuevo { color: #0d47a1; } /* azul fuerte */
+.estado-pendiente { color: #1976d2; } /* azul normal */
+.estado-asignado { color: #ef6c00; } /* naranja */
+.estado-en-proceso { color: #2e7d32; } /* verde */
+.estado-finalizado { color: #000000; } /* negro */
 @media (max-width: 600px) {
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
+  .form { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
 }

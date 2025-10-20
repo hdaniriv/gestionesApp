@@ -1,0 +1,42 @@
+<div class="page">
+  <h2>Mis datos de Cliente</h2>
+  <p class="hint" *ngIf="!hasClient()">
+    Completa tus datos para asociar tu usuario a un Cliente. Luego podrás crear
+    gestiones.
+  </p>
+
+  <form class="form" (ngSubmit)="save()" *ngIf="!loading()">
+    <div class="grid-2">
+      <label>Nombre
+        <input [(ngModel)]="draft().nombre" name="nombre" required />
+      </label>
+      <label>Teléfono
+        <input [(ngModel)]="draft().telefono" name="telefono" required />
+      </label>
+      <label>Email
+        <input [(ngModel)]="draft().email" name="email" />
+      </label>
+      <label>NIT
+        <input [(ngModel)]="draft().nit" name="nit" required />
+      </label>
+      <label class="full-row">Dirección
+        <input [(ngModel)]="draft().direccion" name="direccion" required />
+      </label>
+    </div>
+
+    <div class="map-block">
+      <app-map-picker
+        [lat]="draft().latitud || undefined"
+        [lng]="draft().longitud || undefined"
+        (changed)="onMapChange($event)"
+      ></app-map-picker>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit">
+        <span class="material-icons">save</span>
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

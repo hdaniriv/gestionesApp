@@ -10,8 +10,9 @@
   <table class="tbl">
     <thead>
       <tr>
-        <th></th>
-        <th>ID</th>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones">more_horiz</span>
+        </th>
         <th>Nombres</th>
         <th>Apellidos</th>
         <th>Tipo</th>
@@ -20,17 +21,18 @@
     </thead>
     <tbody>
       <tr *ngFor="let e of empleados()">
-        <td class="right">
+        <td class="options-col">
           <app-action-menu
             [canView]="true"
             [canEdit]="canEdit()"
             [canDelete]="canDelete()"
+            [canAssignTecnicos]="canEdit() && isSupervisorTipo(e.idEmpleadoTipo)"
             (view)="openView(e)"
             (edit)="openEdit(e)"
             (remove)="remove(e)"
+            (assignTecnicos)="openAsignar(e)"
           ></app-action-menu>
         </td>
-        <td>{{ e.id }}</td>
         <td>{{ e.nombres }}</td>
         <td>{{ e.apellidos }}</td>
         <td>{{ empleadoTipoNombre(e.idEmpleadoTipo) }}</td>
@@ -52,6 +54,12 @@
         </option>
       </select>
     </label>
+    <div class="full-row" *ngIf="modalMode() === 'edit' && isSupervisorTipo(draft.idEmpleadoTipo)">
+      <button class="btn" (click)="openAsignar(draft)">
+        <span class="material-icons" aria-hidden="true">group_add</span>
+        Asignar técnicos
+      </button>
+    </div>
     <label>Teléfono <input [(ngModel)]="draft.telefono" /></label>
     <label>Dirección <input [(ngModel)]="draft.direccion" /></label>
   </div>
@@ -71,5 +79,23 @@
       <span class="material-icons" aria-hidden="true">close</span>
       Cancelar
     </button>
+  </div>
+</app-modal>
+
+<app-modal [open]="asignacionOpen()" [title]="'Asignar técnicos a ' + (asignacionSupervisor?.nombres || '')" (close)="closeAsignar()">
+  <div class="form">
+    <div class="full-row" style="grid-column:1 / -1">
+      <p>Marca los técnicos que estarán a cargo del supervisor.</p>
+    </div>
+    <div class="full-row" style="grid-column:1 / -1; max-height: 300px; overflow:auto; border:1px solid #eee; border-radius:6px; padding:8px;">
+      <label *ngFor="let t of tecnicos()" style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <input type="checkbox" [checked]="seleccionTecnicos.has(t.id!)" (change)="toggleTecnico(t.id!, $event.target.checked)" />
+        <span>{{ t.nombres }} {{ t.apellidos }}</span>
+      </label>
+    </div>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" (click)="saveAsignaciones()"><span class="material-icons">save</span> Guardar</button>
+    <button class="btn outline" (click)="closeAsignar()"><span class="material-icons">close</span> Cancelar</button>
   </div>
 </app-modal>

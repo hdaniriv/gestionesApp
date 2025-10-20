@@ -9,11 +9,15 @@
   z-index: 1000;
 }
 .card {
-  width: min(720px, 100%);
+  width: 100%;
+  max-width: 900px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
 }
 header,
 footer {
@@ -29,6 +33,7 @@ footer {
 }
 .body {
   padding: 16px;
+  overflow: auto;
 }
 .close {
   border: none;
@@ -36,3 +41,10 @@ footer {
   font-size: 20px;
   cursor: pointer;
 }
+
+/* Size variants */
+.card.sm { max-width: 520px; }
+.card.md { max-width: 720px; }
+.card.lg { max-width: 900px; }
+.card.xl { max-width: 1200px; }
+.card.fullscreen { max-width: none; width: calc(100vw - 40px); height: calc(100vh - 40px); }

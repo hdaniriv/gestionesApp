@@ -20,6 +20,9 @@ export class ActionMenuComponent {
   @Input() canView = true;
   @Input() canEdit = false;
   @Input() canDelete = false;
+  @Input() canAssign = false;
+  // Acción opcional: asignar técnicos (pantalla Empleados)
+  @Input() canAssignTecnicos = false;
   // Acción opcional exclusiva para la pantalla de Usuarios
   @Input() canRoles = false;
   // Acción opcional: cambiar contraseña (p.ej., para el usuario actual)
@@ -29,6 +32,8 @@ export class ActionMenuComponent {
   @Output() view = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
   @Output() remove = new EventEmitter<void>();
+  @Output() assign = new EventEmitter<void>();
+  @Output() assignTecnicos = new EventEmitter<void>();
   @Output() roles = new EventEmitter<void>();
   @Output() changePassword = new EventEmitter<void>();
   @Output() resetPassword = new EventEmitter<void>();
@@ -112,6 +117,16 @@ export class ActionMenuComponent {
   onRemove(ev: Event) {
     ev.stopPropagation();
     this.remove.emit();
+    this.open = false;
+  }
+  onAssign(ev: Event) {
+    ev.stopPropagation();
+    this.assign.emit();
+    this.open = false;
+  }
+  onAssignTecnicos(ev: Event) {
+    ev.stopPropagation();
+    this.assignTecnicos.emit();
     this.open = false;
   }
   onRoles(ev: Event) {

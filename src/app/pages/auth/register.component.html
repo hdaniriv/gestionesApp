@@ -1,0 +1,38 @@
+<div class="auth-wrapper">
+  <div class="card">
+    <h2>Crear cuenta</h2>
+    <p class="subtitle">Regístrate para solicitar gestiones como cliente.</p>
+
+    <form (ngSubmit)="submit()" #form="ngForm" autocomplete="off">
+      <label>
+        Usuario
+        <input name="username" [(ngModel)]="username" required minlength="3" autocomplete="new-username" />
+      </label>
+      <label>
+        Nombre completo (opcional)
+        <input name="nombre" [(ngModel)]="nombre" />
+      </label>
+      <label>
+        Correo (opcional)
+        <input name="email" type="email" [(ngModel)]="email" />
+      </label>
+      <label>
+        Contraseña
+        <input name="password" type="password" [(ngModel)]="password" required minlength="6" autocomplete="new-password" />
+      </label>
+      <label>
+        Confirmar contraseña
+        <input name="confirm" type="password" [(ngModel)]="confirm" required minlength="6" autocomplete="new-password" />
+      </label>
+
+      <button class="btn" type="submit" [disabled]="!valid || loading()">
+        <span class="material-icons" aria-hidden="true">person_add</span>
+        Crear cuenta
+      </button>
+      <a routerLink="/login" class="btn outline" style="margin-left:8px">
+        <span class="material-icons" aria-hidden="true">login</span>
+        Ya tengo cuenta
+      </a>
+    </form>
+  </div>
+</div>

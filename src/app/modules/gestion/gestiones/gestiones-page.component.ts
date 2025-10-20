@@ -5,7 +5,10 @@ import { ApiService } from "../../../core/api.service";
 import { AuthService } from "../../../core/auth.service";
 import { ModalComponent } from "../../../shared/modal/modal.component";
 import { ActionMenuComponent } from "../../../shared/action-menu/action-menu.component";
+import { SharedModule } from "../../../shared/shared.module";
 import { firstValueFrom } from "rxjs";
+import { Router } from "@angular/router";
+import { NotifyService } from "../../../shared/notify/notify.service";
 
 interface Gestion {
   id?: number;
@@ -20,6 +23,9 @@ interface Gestion {
   fechaFin?: string;
   observaciones?: string;
   estado?: string;
+  fechaCreacion?: string;
+  fechaModificacion?: string;
+  idUsuarioCreador?: number;
 }
 interface TipoGestion {
   id: number;
@@ -29,29 +35,56 @@ interface Empleado {
   id: number;
   nombres: string;
   apellidos: string;
+  idEmpleadoTipo?: number;
+}
+interface EmpleadoTipo { id: number; nombre: string; }
+interface ClienteLite {
+  id: number;
+  nombre: string;
+  nit?: string;
 }
 
 @Component({
   standalone: true,
   selector: "app-gestiones-page",
-  imports: [CommonModule, FormsModule, ModalComponent, ActionMenuComponent],
+  imports: [CommonModule, FormsModule, ModalComponent, ActionMenuComponent, SharedModule],
   templateUrl: "./gestiones-page.component.html",
   styleUrls: ["./gestiones-page.component.css"],
 })
 export class GestionesPageComponent implements OnInit {
   private api = inject(ApiService);
-  private auth = inject(AuthService);
+  auth = inject(AuthService);
+  private router = inject(Router);
+  private notify = inject(NotifyService);
   gestiones = signal<Gestion[]>([]);
   tipos = signal<TipoGestion[]>([]);
   empleados = signal<Empleado[]>([]);
+  empleadoTipos = signal<EmpleadoTipo[]>([]);
+  clientes = signal<ClienteLite[]>([]);
+  selfCliente?: any;
   modalOpen = signal(false);
   modalMode = signal<"create" | "edit" | "view">("create");
   modalTitle = signal("");
   draft: Gestion = { idCliente: 0, idTipoGestion: 0, direccion: "" } as any;
+  asignacionOpen = signal(false);
+  asignacionDraft: { idTecnico?: number; fechaInicio?: string; fechaFin?: string } = {};
+
+  filtros: {
+    desde?: string;
+    hasta?: string;
+    idTipoGestion?: number;
+    estado?: string;
+    asignacion?: 'sin-tecnico' | 'con-tecnico' | undefined;
+  } = {};
+
+  filtersOpen = true;
+  estadosPosibles: string[] = ["Nuevo", "Asignado", "En Proceso", "Finalizado", "Pendiente"];
 
   canCreate() {
     return (
-      this.auth.hasRole("Administrador") || this.auth.hasRole("Supervisor")
+      this.auth.hasRole("Administrador") ||
+      this.auth.hasRole("Supervisor") ||
+      this.auth.hasRole("Cliente")
     );
   }
   canEdit() {
@@ -63,6 +96,13 @@ export class GestionesPageComponent implements OnInit {
   }
   canDelete() {
     return this.auth.hasRole("Administrador");
+  }
+  canAsignar() {
+    return (
+      this.auth.hasRole("Administrador") ||
+      this.auth.hasRole("Supervisor") ||
+      this.auth.hasRole("Técnico")
+    );
   }
 
   tipoNombre(id?: number) {
@@ -76,12 +116,47 @@ export class GestionesPageComponent implements OnInit {
       : "";
   }
 
+  computeEstadoDisplay(g: Partial<Gestion>): string {
+    if (g.fechaFin) return "Finalizado";
+    if (g.fechaInicio) return "En Proceso";
+    if (g.idTecnico) return "Asignado";
+    return "Nuevo";
+  }
+
+  private toInputDateTime(value?: string | Date): string | undefined {
+    if (!value) return undefined;
+    const d = value instanceof Date ? value : new Date(value);
+    if (isNaN(d.getTime())) return undefined;
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    // datetime-local requiere YYYY-MM-DDTHH:MM
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
+
   async ngOnInit() {
-    await Promise.all([this.loadTipos(), this.loadEmpleados(), this.load()]);
+    this.setDefaultDateFilters();
+    await Promise.all([
+      this.loadTipos(),
+      this.loadEmpleadosIfAllowed(),
+      this.loadClientesIfAllowed(),
+      this.loadSelfClienteIfClienteRole(),
+    ]);
+    await this.load();
   }
   async load() {
+    // Usar el endpoint de búsqueda que aplica reglas por rol en el backend
+    const params: any = {};
+    if (this.filtros.desde) params.desde = this.filtros.desde;
+    if (this.filtros.hasta) params.hasta = this.filtros.hasta;
+    if (this.filtros.idTipoGestion) params.idTipoGestion = this.filtros.idTipoGestion;
+    if (this.filtros.estado) params.estado = this.filtros.estado;
+    if (this.filtros.asignacion) params.asignacion = this.filtros.asignacion;
     const list = await firstValueFrom(
-      this.api.get<Gestion[]>("/gestion/gestiones")
+      this.api.get<Gestion[]>("/gestion/gestiones/search", params)
     );
     this.gestiones.set(list || []);
   }
@@ -91,11 +166,93 @@ export class GestionesPageComponent implements OnInit {
     );
     this.tipos.set(list || []);
   }
-  async loadEmpleados() {
-    const list = await firstValueFrom(
-      this.api.get<Empleado[]>("/gestion/empleados")
-    );
-    this.empleados.set(list || []);
+
+  async reload() {
+    await this.load();
+  }
+
+  toggleFilters() {
+    this.filtersOpen = !this.filtersOpen;
+  }
+
+  clearFilters() {
+    this.filtros = {};
+    this.setDefaultDateFilters();
+    this.reload();
+  }
+
+  hasAnyFilter() {
+    const f = this.filtros;
+    return !!(f.desde || f.hasta || f.idTipoGestion || f.estado);
+  }
+
+  private setDefaultDateFilters() {
+    // Desde el primer día del mes hasta hoy (YYYY-MM-DD)
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const toDate = (d: Date) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    if (!this.filtros.desde) this.filtros.desde = toDate(start);
+    if (!this.filtros.hasta) this.filtros.hasta = toDate(now);
+  }
+
+  applyFilters() {
+    this.reload();
+  }
+  async loadEmpleadosIfAllowed() {
+    // Solo Admin/Supervisor necesitan catálogo de técnicos
+    const isAdmin = this.auth.hasRole('Administrador');
+    const isSupervisor = this.auth.hasRole('Supervisor');
+    if (!(isAdmin || isSupervisor)) { this.empleados.set([]); return; }
+    // Cargar tipos de empleado para poder filtrar por Técnico
+    try {
+      const tipos = await firstValueFrom(this.api.get<EmpleadoTipo[]>("/gestion/empleado-tipos"));
+      this.empleadoTipos.set(tipos || []);
+    } catch { this.empleadoTipos.set([]); }
+
+    if (isSupervisor && !isAdmin) {
+      // Supervisores: solo sus técnicos
+      const list = await firstValueFrom(this.api.get<Empleado[]>("/gestion/empleados/mis-tecnicos"));
+      this.empleados.set((list || []).filter(e => this.isTecnicoTipo(e.idEmpleadoTipo)));
+    } else {
+      // Admin: todos los empleados, pero mostrar sólo técnicos
+      const list = await firstValueFrom(this.api.get<Empleado[]>("/gestion/empleados"));
+      this.empleados.set((list || []).filter(e => this.isTecnicoTipo(e.idEmpleadoTipo)));
+    }
+  }
+  async loadClientesIfAllowed() {
+    // Solo Admin/Supervisor pueden listar clientes
+    if (this.auth.hasRole("Administrador") || this.auth.hasRole("Supervisor")) {
+      const list = await firstValueFrom(
+        this.api.get<any[]>("/gestion/clientes")
+      );
+      const lite = (list || []).map((c) => ({ id: c.id, nombre: c.nombre, nit: c.nit }));
+      this.clientes.set(lite);
+    } else {
+      this.clientes.set([]);
+    }
+  }
+
+  async loadSelfClienteIfClienteRole() {
+    if (this.auth.hasRole("Cliente")) {
+      try {
+        const self = await firstValueFrom(this.api.get<any>("/gestion/clientes/self"));
+        this.selfCliente = self?.id ? self : undefined;
+      } catch {}
+    }
+  }
+
+  private empleadoTipoNombre(id?: number): string {
+    if (!id) return '';
+    return this.empleadoTipos().find(t => t.id === id)?.nombre || '';
+  }
+  private isTecnicoTipo(idTipo?: number): boolean {
+    const name = (this.empleadoTipoNombre(idTipo) || '').toLowerCase();
+    return name.includes('técnico') || name.includes('tecnico');
   }
 
   openCreate() {
@@ -105,8 +262,96 @@ export class GestionesPageComponent implements OnInit {
       idCliente: 0,
       idTipoGestion: this.tipos()[0]?.id || 0,
       direccion: "",
+      // fecha por defecto ahora
+      fechaProgramada: this.defaultFechaProgramada(),
     } as any;
+    // Si es Cliente, obtener su cliente propio y setear idCliente; si no tiene, redirigir a completar datos
+    if (this.auth.hasRole("Cliente")) {
+      this.api
+        .get<any>("/gestion/clientes/self")
+        .toPromise()
+        .then((self) => {
+          if (self?.id) {
+            this.selfCliente = self;
+            this.draft.idCliente = self.id;
+            // completar datos del cliente
+            this.draft.latitud = self.latitud ?? undefined;
+            this.draft.longitud = self.longitud ?? undefined;
+            this.draft.direccion = self.direccion ?? "";
+            this.modalOpen.set(true);
+          } else {
+            this.router.navigateByUrl("/app/gestion/mi-cliente");
+          }
+        })
+        .catch(() => {
+          this.router.navigateByUrl("/app/gestion/mi-cliente");
+        });
+      return;
+    }
     this.modalOpen.set(true);
+  }
+
+  defaultFechaProgramada() {
+    const now = new Date();
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
+
+  onMapChanged(ev: { lat: number; lng: number }) {
+    this.draft.latitud = String(ev.lat);
+    this.draft.longitud = String(ev.lng);
+  }
+
+  clienteNombreNit() {
+    const c = this.clientes().find((x) => x.id === this.draft.idCliente);
+    if (!c) return `${this.draft.idCliente}`;
+    return `${c.nombre}${c.nit ? " (" + c.nit + ")" : ""}`;
+  }
+
+  clienteNombreNitById(id?: number) {
+    if (!id) return "";
+    // Si es rol Cliente y corresponde a su propio cliente
+    if (this.auth.hasRole("Cliente") && this.selfCliente?.id === id) {
+      const c = this.selfCliente;
+      return `${c.nombre}${c.nit ? " (" + c.nit + ")" : ""}`;
+    }
+    // Si hay catálogo de clientes cargado (Admin/Supervisor)
+    const c = this.clientes().find((x) => x.id === id);
+    if (c) return `${c.nombre}${c.nit ? " (" + c.nit + ")" : ""}`;
+    // Fallback: mostrar ID
+    return `${id}`;
+  }
+
+  clienteNombreById(id?: number) {
+    if (!id) return "";
+    if (this.auth.hasRole("Cliente") && this.selfCliente?.id === id) {
+      return this.selfCliente?.nombre || "";
+    }
+    const c = this.clientes().find((x) => x.id === id);
+    return c?.nombre || "";
+  }
+
+  clienteNitById(id?: number) {
+    if (!id) return "";
+    if (this.auth.hasRole("Cliente") && this.selfCliente?.id === id) {
+      return this.selfCliente?.nit || "";
+    }
+    const c = this.clientes().find((x) => x.id === id);
+    return c?.nit || "";
+  }
+
+  async onClienteChange(id: number) {
+    if (!id) return;
+    // traer datos del cliente y prellenar direccion/coords
+    const c = await firstValueFrom(this.api.get<any>(`/gestion/clientes/${id}`));
+    this.draft.direccion = c?.direccion || "";
+    this.draft.latitud = c?.latitud ?? undefined;
+    this.draft.longitud = c?.longitud ?? undefined;
   }
   openEdit(g: Gestion) {
     this.modalMode.set("edit");
@@ -120,11 +365,45 @@ export class GestionesPageComponent implements OnInit {
     this.draft = { ...g };
     this.modalOpen.set(true);
   }
+  openAsignacion(g: Gestion) {
+    if (!this.canAsignar()) return;
+    this.draft = { ...g };
+    this.asignacionDraft = {
+      idTecnico: g.idTecnico,
+      fechaInicio: g.fechaInicio,
+      fechaFin: g.fechaFin,
+    };
+    this.asignacionOpen.set(true);
+  }
+  closeAsignacion() {
+    this.asignacionOpen.set(false);
+  }
+  async saveAsignacion() {
+    if (!this.draft.id) return;
+    const payload: any = {
+      idTecnico: this.asignacionDraft.idTecnico,
+      fechaInicio: this.asignacionDraft.fechaInicio,
+      fechaFin: this.asignacionDraft.fechaFin,
+    };
+    await firstValueFrom(
+      this.api.patch(`/gestion/gestiones/${this.draft.id}/asignacion`, payload)
+    );
+    await this.load();
+    this.closeAsignacion();
+  }
   closeModal() {
     this.modalOpen.set(false);
   }
   async save() {
     // Sanear payload para cumplir con DTO del backend
+    // Validación: Admin/Supervisor deben seleccionar un cliente
+    if (
+      (this.auth.hasRole("Administrador") || this.auth.hasRole("Supervisor")) &&
+      (!this.draft.idCliente || this.draft.idCliente === 0)
+    ) {
+      this.notify.warning("Selecciona un cliente");
+      return;
+    }
     const payload = {
       idCliente: this.draft.idCliente,
       idTecnico: this.draft.idTecnico,

@@ -11,6 +11,7 @@ import { CommonModule } from "@angular/common";
 export class ModalComponent {
   @Input() open = false;
   @Input() title = "";
+  @Input() size: 'sm' | 'md' | 'lg' | 'xl' | 'fullscreen' = 'md';
   @Output() close = new EventEmitter<void>();
   backdrop(_e: Event) {
     this.close.emit();

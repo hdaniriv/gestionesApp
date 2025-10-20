@@ -46,6 +46,11 @@
               >Gestiones</a
             >
           </li>
+          <li *ngIf="isCliente()">
+            <a routerLink="/app/gestion/mi-cliente" routerLinkActive="active"
+              >Mis datos de cliente</a
+            >
+          </li>
         </ul>
         <h4 *ngIf="showAdmin()">Administración</h4>
         <ul *ngIf="showAdmin()">
@@ -64,6 +69,11 @@
               routerLink="/app/gestion/tipos-empleado"
               routerLinkActive="active"
               >Tipos de Empleado</a
+            >
+          </li>
+          <li>
+            <a routerLink="/app/gestion/clientes" routerLinkActive="active"
+              >Clientes</a
             >
           </li>
           <li *ngIf="showUsuarios()">

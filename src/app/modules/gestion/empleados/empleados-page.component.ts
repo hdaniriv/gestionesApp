@@ -38,9 +38,22 @@ export class EmpleadosPageComponent implements OnInit {
   modalMode = signal<"create" | "edit" | "view">("create");
   modalTitle = signal("");
   draft: Empleado = { nombres: "", apellidos: "", idEmpleadoTipo: 0 };
+  asignacionOpen = signal(false);
+  asignacionSupervisor?: Empleado;
+  tecnicos = signal<Empleado[]>([]);
+  seleccionTecnicos = new Set<number>();
 
-  empleadoTipoNombre(id: number) {
-    return this.tipos().find((t) => t.id === id)?.nombre || id;
+  empleadoTipoNombre(id: number): string {
+    const n = this.tipos().find((t) => t.id === id)?.nombre;
+    return n ?? String(id);
+  }
+  isSupervisorTipo(idTipo: number){
+    const name = this.empleadoTipoNombre(idTipo).toLowerCase();
+    return name.includes('supervisor');
+  }
+  isTecnicoTipo(idTipo: number){
+    const name = this.empleadoTipoNombre(idTipo).toLowerCase();
+    return name.includes('técnico') || name.includes('tecnico');
   }
   canEdit() {
     return (
@@ -52,7 +65,8 @@ export class EmpleadosPageComponent implements OnInit {
   }
 
   async ngOnInit() {
-    await Promise.all([this.loadTipos(), this.load()]);
+    await this.loadTipos();
+    await this.load();
   }
   async load() {
     const list = await firstValueFrom(
@@ -87,6 +101,33 @@ export class EmpleadosPageComponent implements OnInit {
     this.modalTitle.set("Ver Empleado");
     this.draft = { ...e };
     this.modalOpen.set(true);
+  }
+  async openAsignar(e: Empleado) {
+    // Solo si es supervisor
+  if (!this.isSupervisorTipo(e.idEmpleadoTipo)) return;
+    this.asignacionSupervisor = e;
+    const all = this.empleados();
+  const tecnicos = all.filter(x => this.isTecnicoTipo(x.idEmpleadoTipo));
+    this.tecnicos.set(tecnicos);
+    // Cargar seleccion actual
+    const rels = await firstValueFrom(this.api.get<any[]>(`/gestion/supervisores-tecnicos/supervisor/${e.id}`));
+    this.seleccionTecnicos = new Set<number>(rels.map(r => r.idTecnico));
+    this.asignacionOpen.set(true);
+  }
+  closeAsignar(){ this.asignacionOpen.set(false); }
+  toggleTecnico(id: number, checked: boolean){
+    if (checked) this.seleccionTecnicos.add(id); else this.seleccionTecnicos.delete(id);
+  }
+  async saveAsignaciones(){
+    if (!this.asignacionSupervisor?.id) return;
+    const idSupervisor = this.asignacionSupervisor.id;
+    // Regla: Al reasignar, borramos todas las actuales y creamos las seleccionadas
+    await firstValueFrom(this.api.delete(`/gestion/supervisores-tecnicos/supervisor/${idSupervisor}`));
+    const ids = Array.from(this.seleccionTecnicos);
+    for (const idTecnico of ids){
+      await firstValueFrom(this.api.post(`/gestion/supervisores-tecnicos`, { idSupervisor, idTecnico }));
+    }
+    this.asignacionOpen.set(false);
   }
   closeModal() {
     this.modalOpen.set(false);

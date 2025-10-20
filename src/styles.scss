@@ -21,9 +21,20 @@ body {
   border: none;
   padding: 8px 14px;
   border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
 }
 .btn.outline {
   background: transparent;
   color: #1976d2;
   border: 1px solid #1976d2;
+}
+@import "leaflet/dist/leaflet.css";
+
+/* Icono dentro de botones: tamaño y alineación consistente */
+.btn .material-icons {
+  font-size: 18px;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 6px;
 }

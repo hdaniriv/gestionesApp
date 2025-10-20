@@ -1,5 +1,5 @@
 <div class="overlay" *ngIf="open" (click)="backdrop($event)">
-  <div class="card" (click)="$event.stopPropagation()">
+  <div class="card" [ngClass]="size" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
     <header>
       <h3>{{ title }}</h3>
       <button class="close" (click)="close.emit()">×</button>

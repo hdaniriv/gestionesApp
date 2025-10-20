@@ -22,6 +22,9 @@
             "inlineStyleLanguage": "scss",
             "assets": ["src/assets", "src/favicon.ico"],
             "styles": ["src/styles.scss"],
+            "allowedCommonJsDependencies": [
+              "leaflet"
+            ],
             "scripts": []
           },
           "configurations": {

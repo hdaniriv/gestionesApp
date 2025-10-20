@@ -1,0 +1,92 @@
+<div class="toolbar">
+  <h2>Clientes</h2>
+  <button class="btn" *ngIf="canEdit()" (click)="openCreate()">
+    <span class="material-icons" aria-hidden="true">add</span> Crear
+  </button>
+</div>
+
+<div class="table-wrapper">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th class="options-col">
+          <span class="material-icons" title="Menú de opciones">more_horiz</span>
+        </th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>Dirección</th>
+        <th>Usuario (opcional)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of clientes()">
+        <td class="options-col">
+          <app-action-menu
+            [canView]="true"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            (view)="openView(c)"
+            (edit)="openEdit(c)"
+            (remove)="remove(c)"
+          ></app-action-menu>
+        </td>
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.telefono || '-' }}</td>
+        <td>{{ c.email || '-' }}</td>
+        <td>{{ c.direccion || '-' }}</td>
+        <td>{{ c.usuarioUsername || '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal CRUD Cliente -->
+<app-modal [open]="modalOpen()" [title]="modalTitle()" [size]="'xl'" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form">
+    <label>Nombre <input [(ngModel)]="draft.nombre" required minlength="3" /></label>
+    <label>Teléfono <input [(ngModel)]="draft.telefono" /></label>
+    <label>Email <input type="email" [(ngModel)]="draft.email" /></label>
+    <label>Dirección <input [(ngModel)]="draft.direccion" /></label>
+    <label>NIT <input [(ngModel)]="draft.nit" required minlength="3" /></label>
+
+    <div class="full-row">
+      <label>Ubicación en el mapa</label>
+      <app-map-picker
+        [lat]="draft.latitud ?? null"
+        [lng]="draft.longitud ?? null"
+        (changed)="draft.latitud = $event.lat; draft.longitud = $event.lng"
+      ></app-map-picker>
+      <small>Lat: {{ draft.latitud ?? '-' }} | Lng: {{ draft.longitud ?? '-' }}</small>
+    </div>
+
+    <label>
+      Usuario asociado (opcional)
+      <select [(ngModel)]="draft.idUsuario">
+        <option [ngValue]="null">— Ninguno —</option>
+        <option *ngFor="let u of usuariosCliente()" [ngValue]="u.id">{{ u.username }}</option>
+      </select>
+    </label>
+  </div>
+  <div *ngIf="modalMode() === 'view'">
+    <p><b>Nombre:</b> {{ draft.nombre }}</p>
+    <p><b>Teléfono:</b> {{ draft.telefono || '-' }}</p>
+    <p><b>Email:</b> {{ draft.email || '-' }}</p>
+    <p><b>Dirección:</b> {{ draft.direccion || '-' }}</p>
+    <p><b>NIT:</b> {{ draft.nit || '-' }}</p>
+    <div style="margin:8px 0">
+      <app-map-picker [lat]="draft.latitud ?? null" [lng]="draft.longitud ?? null" [viewOnly]="true"></app-map-picker>
+    </div>
+    <p><b>Usuario:</b> {{ draft.usuarioUsername || '-' }}</p>
+  </div>
+  <div modal-actions class="actions-row">
+    <button class="btn" *ngIf="modalMode() !== 'view'" [disabled]="!canSubmit()" (click)="save()">
+      <span class="material-icons" aria-hidden="true">save</span>
+      Guardar
+    </button>
+    <button class="btn outline" (click)="closeModal()">
+      <span class="material-icons" aria-hidden="true">close</span>
+      Cancelar
+    </button>
+  </div>
+</app-modal>

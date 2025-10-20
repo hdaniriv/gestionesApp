@@ -14,6 +14,7 @@ import {
   ChangePasswordPayload,
 } from "../../shared/change-password-dialog/change-password-dialog.component";
 import { ApiService } from "../../core/api.service";
+import { NotifyService } from "../../shared/notify/notify.service";
 
 @Component({
   standalone: true,
@@ -32,6 +33,7 @@ export class mainpageComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private api = inject(ApiService);
+  private notify = inject(NotifyService);
   username = computed(() => this.auth.userSig()?.username || "");
   roles = computed(() => this.auth.userSig()?.roles || []);
   sidebarOpen = signal(false);
@@ -98,10 +100,11 @@ export class mainpageComponent {
   async submitChangePassword(payload: ChangePasswordPayload) {
     try {
       await this.api.post("/usuarios/change-password", payload).toPromise();
-      alert("Contraseña actualizada correctamente");
+      this.notify.success("Contraseña actualizada correctamente");
       this.closeChangePassword();
     } catch (e: any) {
-      alert(e?.error?.message || "Error cambiando la contraseña");
+      const msg = e?.error?.message || "Error cambiando la contraseña";
+      this.notify.error(msg);
     }
   }
 }

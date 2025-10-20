@@ -1,0 +1,13 @@
+/* Reutiliza estilos básicos de tablas/modales */
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.table-wrapper { overflow: auto; }
+.tbl { width: 100%; border-collapse: collapse; background: #fff; }
+.tbl th, .tbl td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+.options-col { width: 44px; text-align: left; position: sticky; left: 0; background: #fff; z-index: 2; }
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.form label { display: flex; flex-direction: column; gap: 6px; }
+.form input, .form select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width: 100%; }
+.form .full-row { grid-column: 1 / -1; }
+.actions-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+
+

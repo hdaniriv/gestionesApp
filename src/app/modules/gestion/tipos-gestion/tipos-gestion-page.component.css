@@ -1,11 +1,5 @@
-/* Iconos dentro de botones y espaciado de acciones del modal */
-button.btn .material-icons,
-button.btn.outline .material-icons {
-  font-size: 18px;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-.actions-row {
+/* Espaciado de acciones del modal */
+ .actions-row {
   display: flex;
   gap: 10px;
 }

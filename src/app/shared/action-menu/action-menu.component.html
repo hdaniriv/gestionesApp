@@ -20,6 +20,14 @@
       <span class="material-icons">edit</span>
       <span class="label">Modificar</span>
     </button>
+    <button class="item" *ngIf="canAssign" (click)="onAssign($event)">
+      <span class="material-icons">assignment_ind</span>
+      <span class="label">Asignar / Fechas</span>
+    </button>
+    <button class="item" *ngIf="canAssignTecnicos" (click)="onAssignTecnicos($event)">
+      <span class="material-icons">group_add</span>
+      <span class="label">Asignar técnico</span>
+    </button>
     <button class="item danger" *ngIf="canDelete" (click)="onRemove($event)">
       <span class="material-icons">delete</span>
       <span class="label">Eliminar</span>
