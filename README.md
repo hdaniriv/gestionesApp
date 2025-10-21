@@ -27,3 +27,7 @@ SPA base con módulos de Seguridad y Gestión. Incluye rutas, layout (header + m
 - Implementar guards por rol y menú dinámico
 - Crear componentes reutilizables (tabla, modal, menú contextual)
 - Conectar a endpoints del gateway para CRUD
+
+## Notas sobre Gestiones (UI)
+
+- La lista y el detalle de Gestiones muestran el campo `Codigo` (YYNNNN), de solo lectura, provisto por el backend al crear la gestión.

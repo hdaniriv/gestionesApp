@@ -12,6 +12,7 @@ import { NotifyService } from "../../../shared/notify/notify.service";
 
 interface Gestion {
   id?: number;
+  codigo?: string;
   idCliente: number;
   idTecnico?: number;
   tecnicoNombre?: string;

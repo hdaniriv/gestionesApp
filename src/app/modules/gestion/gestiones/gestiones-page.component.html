@@ -49,6 +49,7 @@
             >more_horiz</span
           >
         </th>
+        <th>Codigo</th>
         <th>Fecha</th>
         <th>NIT</th>
         <th>Cliente</th>
@@ -73,6 +74,7 @@
             (assign)="openAsignacion(g)"
           />
         </td>
+        <td>{{ g.codigo || '-' }}</td>
         <td>
           {{ (g.fechaProgramada || g.fechaInicio || g.fechaFin)
               ? ((g.fechaProgramada || g.fechaInicio || g.fechaFin) | dt)
@@ -171,6 +173,9 @@
     <label>Estado
       <input [value]="computeEstadoDisplay(draft)" disabled />
     </label>
+    <label>Codigo
+      <input [value]="draft.codigo || '—'" disabled />
+    </label>
     <div class="full-row" style="grid-column: 1 / -1; margin-top: 8px;">
       <hr />
       <div class="grid-2">
@@ -188,6 +193,7 @@
   </div>
   <div *ngIf="modalMode() === 'view'">
   <p><b>Cliente:</b> {{ clienteNombreNitById(draft.idCliente) }}</p>
+  <p><b>Codigo:</b> {{ draft.codigo || '-' }}</p>
     <p><b>Tipo:</b> {{ tipoNombre(draft.idTipoGestion) }}</p>
     <p><b>Dirección:</b> {{ draft.direccion }}</p>
   <p><b>Tecnico:</b> {{ draft.tecnicoNombre || empleadoNombre(draft.idTecnico) }}</p>
