@@ -14,6 +14,7 @@ interface Gestion {
   id?: number;
   idCliente: number;
   idTecnico?: number;
+  tecnicoNombre?: string;
   idTipoGestion: number;
   direccion: string;
   latitud?: string;
@@ -100,7 +101,7 @@ export class GestionesPageComponent implements OnInit {
     return (
       this.auth.hasRole("Administrador") ||
       this.auth.hasRole("Supervisor") ||
-      this.auth.hasRole("Técnico")
+  this.auth.hasRole("Tecnico")
     );
   }
   canDelete() {
@@ -110,7 +111,7 @@ export class GestionesPageComponent implements OnInit {
     return (
       this.auth.hasRole("Administrador") ||
       this.auth.hasRole("Supervisor") ||
-      this.auth.hasRole("Técnico")
+  this.auth.hasRole("Tecnico")
     );
   }
 
@@ -118,11 +119,12 @@ export class GestionesPageComponent implements OnInit {
     return this.tipos().find((t) => t.id === id)?.nombre || id;
   }
   empleadoNombre(id?: number) {
-    return this.empleados().find((e) => e.id === id)
-      ? `${this.empleados().find((e) => e.id === id)!.nombres} ${
-          this.empleados().find((e) => e.id === id)!.apellidos
-        }`
-      : "";
+    // Si el draft actual tiene tecnicoNombre, úsalo (para vistas/detalle)
+    if (this.draft && this.draft.idTecnico === id && this.draft.tecnicoNombre) {
+      return this.draft.tecnicoNombre;
+    }
+    const found = this.empleados().find((e) => e.id === id);
+    return found ? `${found.nombres} ${found.apellidos}` : "";
   }
 
   computeEstadoDisplay(g: Partial<Gestion>): string {
@@ -212,22 +214,22 @@ export class GestionesPageComponent implements OnInit {
     this.reload();
   }
   async loadEmpleadosIfAllowed() {
-    // Solo Admin/Supervisor necesitan catálogo de técnicos
+  // Solo Admin/Supervisor necesitan catálogo de tecnicos
     const isAdmin = this.auth.hasRole('Administrador');
     const isSupervisor = this.auth.hasRole('Supervisor');
     if (!(isAdmin || isSupervisor)) { this.empleados.set([]); return; }
-    // Cargar tipos de empleado para poder filtrar por Técnico
+  // Cargar tipos de empleado para poder filtrar por Tecnico
     try {
       const tipos = await firstValueFrom(this.api.get<EmpleadoTipo[]>("/gestion/empleado-tipos"));
       this.empleadoTipos.set(tipos || []);
     } catch { this.empleadoTipos.set([]); }
 
     if (isSupervisor && !isAdmin) {
-      // Supervisores: solo sus técnicos
+  // Supervisores: solo sus tecnicos
       const list = await firstValueFrom(this.api.get<Empleado[]>("/gestion/empleados/mis-tecnicos"));
       this.empleados.set((list || []).filter(e => this.isTecnicoTipo(e.idEmpleadoTipo)));
     } else {
-      // Admin: todos los empleados, pero mostrar sólo técnicos
+  // Admin: todos los empleados, pero mostrar sólo tecnicos
       const list = await firstValueFrom(this.api.get<Empleado[]>("/gestion/empleados"));
       this.empleados.set((list || []).filter(e => this.isTecnicoTipo(e.idEmpleadoTipo)));
     }
@@ -260,7 +262,7 @@ export class GestionesPageComponent implements OnInit {
   }
   private isTecnicoTipo(idTipo?: number): boolean {
     const name = (this.empleadoTipoNombre(idTipo) || '').toLowerCase();
-    return name.includes('técnico') || name.includes('tecnico');
+  return name.includes('tecnico') || name.includes('tecnico');
   }
 
   openCreate() {
