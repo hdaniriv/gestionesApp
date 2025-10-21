@@ -44,6 +44,13 @@ interface ClienteLite {
   nit?: string;
 }
 
+interface Usuario {
+  id: number;
+  username: string;
+  nombre?: string;
+  email?: string;
+}
+
 @Component({
   standalone: true,
   selector: "app-gestiones-page",
@@ -68,13 +75,15 @@ export class GestionesPageComponent implements OnInit {
   draft: Gestion = { idCliente: 0, idTipoGestion: 0, direccion: "" } as any;
   asignacionOpen = signal(false);
   asignacionDraft: { idTecnico?: number; fechaInicio?: string; fechaFin?: string } = {};
+  // Auditoría: nombre del usuario creador resuelto desde el microservicio principal
+  creatorNombre = signal<string | null>(null);
+  private usuarioCache = new Map<number, string>();
 
   filtros: {
     desde?: string;
     hasta?: string;
     idTipoGestion?: number;
     estado?: string;
-    asignacion?: 'sin-tecnico' | 'con-tecnico' | undefined;
   } = {};
 
   filtersOpen = true;
@@ -154,7 +163,6 @@ export class GestionesPageComponent implements OnInit {
     if (this.filtros.hasta) params.hasta = this.filtros.hasta;
     if (this.filtros.idTipoGestion) params.idTipoGestion = this.filtros.idTipoGestion;
     if (this.filtros.estado) params.estado = this.filtros.estado;
-    if (this.filtros.asignacion) params.asignacion = this.filtros.asignacion;
     const list = await firstValueFrom(
       this.api.get<Gestion[]>("/gestion/gestiones/search", params)
     );
@@ -357,12 +365,14 @@ export class GestionesPageComponent implements OnInit {
     this.modalMode.set("edit");
     this.modalTitle.set("Modificar Gestión");
     this.draft = { ...g };
+    this.setCreatorNombreFromDraft();
     this.modalOpen.set(true);
   }
   openView(g: Gestion) {
     this.modalMode.set("view");
     this.modalTitle.set("Ver Gestión");
     this.draft = { ...g };
+    this.setCreatorNombreFromDraft();
     this.modalOpen.set(true);
   }
   openAsignacion(g: Gestion) {
@@ -431,5 +441,21 @@ export class GestionesPageComponent implements OnInit {
     if (!confirm("¿Eliminar gestión?")) return;
     await firstValueFrom(this.api.delete(`/gestion/gestiones/${g.id}`));
     await this.load();
+  }
+
+  private async setCreatorNombreFromDraft() {
+    this.creatorNombre.set(null);
+    const id = this.draft.idUsuarioCreador;
+    if (!id) return;
+    const cached = this.usuarioCache.get(id);
+    if (cached) { this.creatorNombre.set(cached); return; }
+    try {
+      const u = await firstValueFrom(this.api.get<Usuario>(`/usuarios/${id}`));
+      const display = (u?.nombre?.trim() || u?.username || `ID ${id}`).toString();
+      this.usuarioCache.set(id, display);
+      this.creatorNombre.set(display);
+    } catch {
+      this.creatorNombre.set(null);
+    }
   }
 }

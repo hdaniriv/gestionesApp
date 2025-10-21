@@ -17,6 +17,7 @@
         <th>Apellidos</th>
         <th>Tipo</th>
         <th>Teléfono</th>
+        <th>Usuario</th>
       </tr>
     </thead>
     <tbody>
@@ -37,15 +38,22 @@
         <td>{{ e.apellidos }}</td>
         <td>{{ empleadoTipoNombre(e.idEmpleadoTipo) }}</td>
         <td>{{ e.telefono }}</td>
+        <td>{{ usuarioNombre(e.idUsuario) }}</td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<app-modal [open]="modalOpen()" [title]="modalTitle()" (close)="closeModal()">
-  <div *ngIf="modalMode() !== 'view'" class="form">
-    <label>Nombres <input [(ngModel)]="draft.nombres" required /></label>
-    <label>Apellidos <input [(ngModel)]="draft.apellidos" required /></label>
+<app-modal [open]="modalOpen()" [title]="modalTitle()" [size]="'xl'" (close)="closeModal()">
+  <div *ngIf="modalMode() !== 'view'" class="form grid-2">
+    <label>
+      Nombres
+      <input [(ngModel)]="draft.nombres" required />
+    </label>
+    <label>
+      Apellidos
+      <input [(ngModel)]="draft.apellidos" required />
+    </label>
     <label
       >Tipo de Empleado
       <select [(ngModel)]="draft.idEmpleadoTipo">
@@ -54,21 +62,64 @@
         </option>
       </select>
     </label>
+    <label>
+      Usuario Asociado
+      <select [(ngModel)]="draft.idUsuario" [disabled]="loadingUsuarios() || usuarios().length === 0">
+        <option [ngValue]="null">Sin usuario asignado</option>
+        <option *ngFor="let u of usuarios()" [ngValue]="u.id">
+          {{ usuarioNombre(u.id) }} <span *ngIf="u.username">({{ u.username }})</span>
+        </option>
+      </select>
+      <div class="inline-hint" *ngIf="loadingUsuarios()">
+        <span class="spinner"></span> Cargando usuarios...
+      </div>
+      <small class="hint warning" *ngIf="usuarios().length === 0">
+        No hay usuarios disponibles para asociar. Verifica el microservicio principal.
+      </small>
+    </label>
     <div class="full-row" *ngIf="modalMode() === 'edit' && isSupervisorTipo(draft.idEmpleadoTipo)">
       <button class="btn" (click)="openAsignar(draft)">
         <span class="material-icons" aria-hidden="true">group_add</span>
         Asignar técnicos
       </button>
     </div>
-    <label>Teléfono <input [(ngModel)]="draft.telefono" /></label>
-    <label>Dirección <input [(ngModel)]="draft.direccion" /></label>
+    <label>
+      Teléfono
+      <input [(ngModel)]="draft.telefono" />
+    </label>
+    <label class="full-row">
+      Dirección
+      <input [(ngModel)]="draft.direccion" />
+    </label>
+    <hr class="section-divider full-row" />
+    <div class="audit full-row">
+      <div class="audit-grid">
+        <label>
+          Fecha Creación
+          <input [value]="draft.fechaCreacion ? (draft.fechaCreacion | date:'dd/MM/yyyy HH:mm') : '—'" disabled />
+        </label>
+        <label>
+          Fecha Modificación
+          <input [value]="draft.fechaModificacion ? (draft.fechaModificacion | date:'dd/MM/yyyy HH:mm') : '—'" disabled />
+        </label>
+        <label>
+          Usuario Creador
+          <input [value]="creatorNombre() || (draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '—')" disabled />
+        </label>
+      </div>
+    </div>
   </div>
-  <div *ngIf="modalMode() === 'view'">
+  <div *ngIf="modalMode() === 'view'" class="view-block">
     <p><b>Nombres:</b> {{ draft.nombres }}</p>
     <p><b>Apellidos:</b> {{ draft.apellidos }}</p>
     <p><b>Tipo:</b> {{ empleadoTipoNombre(draft.idEmpleadoTipo) }}</p>
+    <p><b>Usuario Asociado:</b> {{ usuarioNombre(draft.idUsuario) }}</p>
     <p><b>Teléfono:</b> {{ draft.telefono }}</p>
     <p><b>Dirección:</b> {{ draft.direccion }}</p>
+    <hr />
+    <p><b>Fecha Creación:</b> {{ draft.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
+    <p><b>Fecha Modificación:</b> {{ draft.fechaModificacion | date:'dd/MM/yyyy HH:mm' }}</p>
+  <p><b>Usuario Creador:</b> {{ creatorNombre() || (draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '—') }}</p>
   </div>
   <div modal-actions class="actions-row">
     <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">

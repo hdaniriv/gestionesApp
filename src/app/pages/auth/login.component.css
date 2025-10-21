@@ -11,65 +11,16 @@
   background: #ffffff;
 }
 
-/* Patrón de textura de fondo */
-.bg-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 35px,
-      rgba(0, 0, 0, 0.02) 35px,
-      rgba(0, 0, 0, 0.02) 70px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 35px,
-      rgba(0, 0, 0, 0.015) 35px,
-      rgba(0, 0, 0, 0.015) 70px
-    );
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* Elementos decorativos difuminados */
-.bg-blur {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-.bg-blur-1 {
-  top: 60px;
-  left: 60px;
-  width: 250px;
-  height: 250px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.bg-blur-2 {
-  bottom: 60px;
-  right: 60px;
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-/* Tarjeta de login con efecto glassmorphism */
+/* Tarjeta de login */
 .login-card {
   width: 100%;
   max-width: 420px;
   position: relative;
   z-index: 10;
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 28px 24px;
 }
 
@@ -329,12 +280,6 @@
 
   .subtitle {
     font-size: 13px;
-  }
-
-  .bg-blur-1,
-  .bg-blur-2 {
-    width: 180px;
-    height: 180px;
   }
 
   .actions {

@@ -38,13 +38,6 @@
       <option *ngFor="let e of estadosPosibles" [ngValue]="e">{{ e }}</option>
     </select>
   </label>
-  <label>Asignación
-    <select [(ngModel)]="filtros.asignacion">
-      <option [ngValue]="undefined">-- Todas --</option>
-      <option [ngValue]="'sin-tecnico'">Sin técnico</option>
-      <option [ngValue]="'con-tecnico'">Con técnico</option>
-    </select>
-  </label>
 </div>
 
 <div class="table-wrapper">
@@ -189,7 +182,7 @@
         </label>
       </div>
       <label>Usuario que creó
-        <input [value]="draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '—'" disabled />
+        <input [value]="creatorNombre() || (draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '—')" disabled />
       </label>
     </div>
   </div>
@@ -220,7 +213,7 @@
     <hr />
   <p><b>Creado:</b> {{ draft.fechaCreacion ? (draft.fechaCreacion | dt) : '-' }}</p>
   <p><b>Modificado:</b> {{ draft.fechaModificacion ? (draft.fechaModificacion | dt) : '-' }}</p>
-    <p><b>Usuario creador (ID):</b> {{ draft.idUsuarioCreador || '-' }}</p>
+  <p><b>Usuario creador:</b> {{ creatorNombre() || (draft.idUsuarioCreador ? ('ID ' + draft.idUsuarioCreador) : '-') }}</p>
   </div>
   <div modal-actions class="actions-row">
     <button class="btn" *ngIf="modalMode() !== 'view'" (click)="save()">

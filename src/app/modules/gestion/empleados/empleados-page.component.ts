@@ -15,11 +15,22 @@ interface Empleado {
   direccion?: string;
   idEmpleadoTipo: number;
   idUsuario?: number;
+  // Auditoría (solo lectura)
+  fechaCreacion?: string | Date;
+  fechaModificacion?: string | Date;
+  idUsuarioCreador?: number;
 }
 
 interface EmpleadoTipo {
   id: number;
   nombre: string;
+}
+
+interface Usuario {
+  id: number;
+  username: string;
+  email?: string;
+  nombre?: string; // nombre completo opcional
 }
 
 @Component({
@@ -34,6 +45,11 @@ export class EmpleadosPageComponent implements OnInit {
   private auth = inject(AuthService);
   empleados = signal<Empleado[]>([]);
   tipos = signal<EmpleadoTipo[]>([]);
+  usuarios = signal<Usuario[]>([]);
+  loadingUsuarios = signal<boolean>(false);
+  // Nombre mostrado del usuario creador del registro actual
+  creatorNombre = signal<string | null>(null);
+  private usuarioCache = new Map<number, string>();
   modalOpen = signal(false);
   modalMode = signal<"create" | "edit" | "view">("create");
   modalTitle = signal("");
@@ -46,6 +62,14 @@ export class EmpleadosPageComponent implements OnInit {
   empleadoTipoNombre(id: number): string {
     const n = this.tipos().find((t) => t.id === id)?.nombre;
     return n ?? String(id);
+  }
+  
+  usuarioNombre(idUsuario?: number | null): string {
+    if (!idUsuario) return "-";
+    const usuario = this.usuarios().find((u) => u.id === idUsuario);
+    if (!usuario) return `Usuario ${idUsuario}`;
+    // Priorizar nombre completo si existe, si no usar username
+    return usuario.nombre?.trim() || usuario.username;
   }
   isSupervisorTipo(idTipo: number){
     const name = this.empleadoTipoNombre(idTipo).toLowerCase();
@@ -66,6 +90,7 @@ export class EmpleadosPageComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadTipos();
+    await this.loadUsuarios();
     await this.load();
   }
   async load() {
@@ -79,6 +104,22 @@ export class EmpleadosPageComponent implements OnInit {
       this.api.get<EmpleadoTipo[]>("/gestion/empleado-tipos")
     );
     this.tipos.set(list || []);
+  }
+  
+  async loadUsuarios() {
+    try {
+      this.loadingUsuarios.set(true);
+      const list = await firstValueFrom(
+        // Usuarios vienen del microservicio principal (sistema) bajo /api
+        this.api.get<Usuario[]>("/usuarios/active")
+      );
+      this.usuarios.set(list || []);
+    } catch (error) {
+      console.warn("No se pudieron cargar los usuarios:", error);
+      this.usuarios.set([]);
+    } finally {
+      this.loadingUsuarios.set(false);
+    }
   }
   openCreate() {
     this.modalMode.set("create");
@@ -94,12 +135,14 @@ export class EmpleadosPageComponent implements OnInit {
     this.modalMode.set("edit");
     this.modalTitle.set("Modificar Empleado");
     this.draft = { ...e };
+    this.setCreatorNombreFromDraft();
     this.modalOpen.set(true);
   }
   openView(e: Empleado) {
     this.modalMode.set("view");
     this.modalTitle.set("Ver Empleado");
     this.draft = { ...e };
+    this.setCreatorNombreFromDraft();
     this.modalOpen.set(true);
   }
   async openAsignar(e: Empleado) {
@@ -133,10 +176,21 @@ export class EmpleadosPageComponent implements OnInit {
     this.modalOpen.set(false);
   }
   async save() {
+    const buildPayload = (e: Empleado) => ({
+      nombres: e.nombres,
+      apellidos: e.apellidos,
+      telefono: e.telefono,
+      direccion: e.direccion,
+      idEmpleadoTipo: e.idEmpleadoTipo,
+      idUsuario: e.idUsuario ?? null,
+    });
+
     if (this.modalMode() === "create") {
-      await firstValueFrom(this.api.post("/gestion/empleados", this.draft));
+      const body = buildPayload(this.draft);
+      await firstValueFrom(this.api.post("/gestion/empleados", body));
     } else if (this.modalMode() === "edit" && this.draft.id) {
-      const { id, ...body } = this.draft as Required<Empleado>;
+      const { id } = this.draft as Required<Empleado>;
+      const body = buildPayload(this.draft);
       await firstValueFrom(this.api.patch(`/gestion/empleados/${id}`, body));
     }
     await this.load();
@@ -147,5 +201,26 @@ export class EmpleadosPageComponent implements OnInit {
     if (!confirm("¿Eliminar empleado?")) return;
     await firstValueFrom(this.api.delete(`/gestion/empleados/${e.id}`));
     await this.load();
+  }
+
+  private async setCreatorNombreFromDraft() {
+    this.creatorNombre.set(null);
+    const id = this.draft.idUsuarioCreador;
+    if (!id) return;
+    // caché local para evitar múltiples llamadas
+    const cached = this.usuarioCache.get(id);
+    if (cached) {
+      this.creatorNombre.set(cached);
+      return;
+    }
+    try {
+      const u = await firstValueFrom(this.api.get<Usuario>(`/usuarios/${id}`));
+      const display = (u?.nombre?.trim() || u?.username || `ID ${id}`).toString();
+      this.usuarioCache.set(id, display);
+      this.creatorNombre.set(display);
+    } catch {
+      // fallback a ID si falla
+      this.creatorNombre.set(null);
+    }
   }
 }
