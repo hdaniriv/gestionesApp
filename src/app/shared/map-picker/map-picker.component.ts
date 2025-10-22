@@ -1,105 +1,111 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import * as L from "leaflet";
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from "@angular/core";
 
 @Component({
   standalone: true,
   selector: "app-map-picker",
   imports: [CommonModule],
   template: `
-    <div class="map-toolbar" *ngIf="!viewOnly">
-      <small>Haga clic en el mapa para seleccionar la ubicación.</small>
+    <div class="map-toolbar">
+      <button class="btn outline" type="button" (click)="useMyLocation()">
+        <span class="material-icons" aria-hidden="true">my_location</span>
+        Usar mi ubicación
+      </button>
+      <small class="hint">Toque el mapa para seleccionar la ubicación</small>
     </div>
-    <div #mapContainer class="map-container" role="region" aria-label="selector de ubicación"></div>
+    <div #mapHost class="map-frame" [style.height]="height"></div>
   `,
-  styles: [`
-    :host { display: block; }
-    .map-container { width: 100%; height: 320px; min-height: 280px; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
-    .map-toolbar { margin-bottom: 6px; color: #555; }
-  `]
+  styles: [
+    `
+      .map-toolbar { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+      .map-toolbar .hint { color:#6b7280; }
+      .map-frame { width:100%; border-radius:8px; overflow:hidden; background:#f3f4f6; border:1px solid #e5e7eb; }
+      .material-icons { font-size: 20px; vertical-align: middle; }
+    `,
+  ],
 })
-export class MapPickerComponent implements OnInit, OnDestroy {
-  @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
-
-  @Input() lat?: number | null;
-  @Input() lng?: number | null;
-  @Input() viewOnly = false;
+export class MapPickerComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() lat?: number;
+  @Input() lng?: number;
+  @Input() height: string = '280px';
   @Output() changed = new EventEmitter<{ lat: number; lng: number }>();
+  @ViewChild('mapHost', { static: true }) mapHost!: ElementRef<HTMLDivElement>;
 
-  private map?: L.Map;
-  private marker?: L.Marker;
+  private map: any;
+  private marker: any;
   private resizeObs?: ResizeObserver;
 
-  ngOnInit(): void {
-    this.initWhenVisible();
+  ngAfterViewInit(): void {
+    this.initMap();
   }
 
-  private initWhenVisible(attempt = 0) {
-    const el = this.mapContainer?.nativeElement;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const visible = rect.width > 0 && rect.height > 0 && !!el.offsetParent;
-    if (!visible && attempt < 10) {
-      setTimeout(() => this.initWhenVisible(attempt + 1), 100);
-      return;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.map && (changes['lat'] || changes['lng'])) {
+      this.setViewAndMarker();
     }
+  }
 
-    const startLat = this.lat ?? 14.6349;  // Guatemala City aprox
+  private initMap() {
+    const el = this.mapHost?.nativeElement;
+    if (!el) return;
+    const startLat = this.lat ?? 14.6349;
     const startLng = this.lng ?? -90.5069;
     const zoom = this.lat != null && this.lng != null ? 15 : 12;
-
-    this.map = L.map(this.mapContainer.nativeElement);
+    // L es global, cargado desde CDN
+    // @ts-ignore
+    this.map = L.map(el);
+    // @ts-ignore
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
     this.map.setView([startLat, startLng], zoom);
-
-    if (this.lat != null && this.lng != null) {
-      this.marker = L.marker([startLat, startLng]).addTo(this.map);
-    }
-
-    if (!this.viewOnly) {
-      this.map.on('click', (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        if (!this.marker) {
-          this.marker = L.marker([lat, lng]).addTo(this.map!);
-        } else {
-          this.marker.setLatLng([lat, lng]);
-        }
-        this.changed.emit({ lat, lng });
-      });
-    }
-
-    // Invalidar tamaño cuando el contenedor cambie (útil en modales)
-    this.resizeObs = new ResizeObserver(() => {
-      this.invalidate();
+    this.setViewAndMarker();
+    this.map.on('click', (e: any) => {
+      const { lat, lng } = e.latlng;
+      this.setMarker(lat, lng);
+      this.changed.emit({ lat, lng });
     });
-    this.resizeObs.observe(this.mapContainer.nativeElement);
+    this.resizeObs = new ResizeObserver(() => this.invalidateSize());
+    this.resizeObs.observe(el);
+    setTimeout(() => this.invalidateSize(), 0);
+    setTimeout(() => this.invalidateSize(), 150);
+  }
 
-    // Invalidar después de montar (por si el modal anima su apertura)
-    setTimeout(() => this.invalidate(), 0);
-    setTimeout(() => this.invalidate(), 150);
-    setTimeout(() => this.invalidate(), 350);
+  private setViewAndMarker() {
+    const lat = this.lat ?? 14.6349;
+    const lng = this.lng ?? -90.5069;
+    this.setMarker(lat, lng);
+    if (this.map) this.map.setView([lat, lng], this.lat != null && this.lng != null ? 15 : 12);
+  }
+
+  private setMarker(lat: number, lng: number) {
+    if (!this.map) return;
+    if (!this.marker) {
+      // @ts-ignore
+      this.marker = L.marker([lat, lng]).addTo(this.map);
+    } else {
+      this.marker.setLatLng([lat, lng]);
+    }
+  }
+
+  private invalidateSize() {
+    if (this.map) this.map.invalidateSize();
+  }
+
+  useMyLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      this.setMarker(lat, lng);
+      if (this.map) this.map.setView([lat, lng], 16);
+      this.changed.emit({ lat, lng });
+    });
   }
 
   ngOnDestroy(): void {
-    if (this.map) {
-      this.map.remove();
-    }
-    if (this.resizeObs) {
-      this.resizeObs.disconnect();
-    }
-  }
-
-  @HostListener('window:resize')
-  onWindowResize() {
-    this.invalidate();
-  }
-
-  private invalidate() {
-    if (this.map) {
-      this.map.invalidateSize();
-    }
+    if (this.map) this.map.remove();
+    if (this.resizeObs) this.resizeObs.disconnect();
   }
 }

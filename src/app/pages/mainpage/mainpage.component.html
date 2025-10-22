@@ -37,54 +37,121 @@
     </div>
   </header>
   <div class="body">
-    <aside class="side" [class.open]="sidebarOpen()">
+    <aside class="side" [class.open]="sidebarOpen()" [class.collapsed]="sidebarCollapsed()">
       <nav>
-        <h4>Gestión</h4>
+        <div class="top-actions">
+          <button
+            class="collapse-control has-tooltip"
+            (click)="toggleSidebarCollapse()"
+            [attr.aria-pressed]="sidebarCollapsed()"
+            [attr.aria-label]="sidebarCollapsed() ? 'Mostrar menú' : 'Ocultar menú'"
+            title="{{ sidebarCollapsed() ? 'Mostrar menú' : 'Ocultar menú' }}"
+          >
+            <span class="material-icons" aria-hidden="true">menu</span>
+            <span class="tooltip">{{ sidebarCollapsed() ? 'Mostrar menú' : 'Ocultar menú' }}</span>
+          </button>
+          <span class="top-title">Sistema de Soporte</span>
+        </div>
+  <h4>Operaciones</h4>
         <ul>
           <li *ngIf="showGestion()">
-            <a routerLink="/app/gestion/gestiones" routerLinkActive="active"
-              >Gestiones</a
+            <a
+              class="nav-link"
+              routerLink="/app/gestion/gestiones"
+              routerLinkActive="active"
+              title="Gestiones"
+              [attr.aria-label]="sidebarCollapsed() ? 'Gestiones' : null"
             >
+              <span class="material-icons" aria-hidden="true">assignment</span>
+              <span class="label">Gestiones</span>
+            </a>
           </li>
           <li *ngIf="isCliente()">
-            <a routerLink="/app/gestion/mi-cliente" routerLinkActive="active"
-              >Mis datos de cliente</a
+            <a
+              class="nav-link"
+              routerLink="/app/gestion/mi-cliente"
+              routerLinkActive="active"
+              title="Mis datos de cliente"
+              [attr.aria-label]="sidebarCollapsed() ? 'Mis datos de cliente' : null"
             >
+              <span class="material-icons" aria-hidden="true">person</span>
+              <span class="label">Mis datos de cliente</span>
+            </a>
           </li>
         </ul>
         <h4 *ngIf="showAdmin()">Administración</h4>
         <ul *ngIf="showAdmin()">
           <li>
-            <a routerLink="/app/gestion/tipos-gestion" routerLinkActive="active"
-              >Tipos de Gestión</a
+            <a
+              class="nav-link"
+              routerLink="/app/gestion/tipos-gestion"
+              routerLinkActive="active"
+              title="Tipos de Gestión"
+              [attr.aria-label]="sidebarCollapsed() ? 'Tipos de Gestión' : null"
             >
-          </li>
-          <li>
-            <a routerLink="/app/gestion/empleados" routerLinkActive="active"
-              >Empleados</a
-            >
+              <span class="material-icons" aria-hidden="true">category</span>
+              <span class="label">Tipos de Gestión</span>
+            </a>
           </li>
           <li>
             <a
-              routerLink="/app/gestion/tipos-empleado"
+              class="nav-link"
+              routerLink="/app/gestion/empleados"
               routerLinkActive="active"
-              >Tipos de Empleado</a
+              title="Empleados"
+              [attr.aria-label]="sidebarCollapsed() ? 'Empleados' : null"
             >
+              <span class="material-icons" aria-hidden="true">badge</span>
+              <span class="label">Empleados</span>
+            </a>
           </li>
           <li>
-            <a routerLink="/app/gestion/clientes" routerLinkActive="active"
-              >Clientes</a
+            <a
+              class="nav-link"
+              routerLink="/app/gestion/tipos-empleado"
+              routerLinkActive="active"
+              title="Tipos de Empleado"
+              [attr.aria-label]="sidebarCollapsed() ? 'Tipos de Empleado' : null"
             >
+              <span class="material-icons" aria-hidden="true">group_work</span>
+              <span class="label">Tipos de Empleado</span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="nav-link"
+              routerLink="/app/gestion/clientes"
+              routerLinkActive="active"
+              title="Clientes"
+              [attr.aria-label]="sidebarCollapsed() ? 'Clientes' : null"
+            >
+              <span class="material-icons" aria-hidden="true">groups</span>
+              <span class="label">Clientes</span>
+            </a>
           </li>
           <li *ngIf="showUsuarios()">
-            <a routerLink="/app/seguridad/usuarios" routerLinkActive="active"
-              >Usuarios</a
+            <a
+              class="nav-link"
+              routerLink="/app/seguridad/usuarios"
+              routerLinkActive="active"
+              title="Usuarios"
+              [attr.aria-label]="sidebarCollapsed() ? 'Usuarios' : null"
             >
+              <span class="material-icons" aria-hidden="true">person</span>
+              <span class="label">Usuarios</span>
+            </a>
           </li>
           <li *ngIf="showRoles()">
-            <a routerLink="/app/seguridad/roles" routerLinkActive="active"
-              >Roles</a
+            <a
+              class="nav-link"
+              routerLink="/app/seguridad/roles"
+              routerLinkActive="active"
+              title="Roles"
+              [attr.aria-label]="sidebarCollapsed() ? 'Roles' : null"
             >
+              <span class="material-icons" aria-hidden="true">security</span>
+              <span class="label">Roles</span>
+            </a>
           </li>
         </ul>
       </nav>
@@ -93,6 +160,8 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+  <!-- Backdrop para menú móvil -->
+  <div class="backdrop" *ngIf="sidebarOpen()" (click)="toggleSidebar()"></div>
   <footer>
     Universidad Mariano Galvez, Facultad de Ingeniería en Sistemas — Derechos
     reservados 2025

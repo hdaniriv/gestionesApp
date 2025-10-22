@@ -149,18 +149,6 @@
         <input disabled [value]="'No asignado'" />
       </label>
     </ng-template>
-    <div class="grid-2">
-      <label>Latitud <input [(ngModel)]="draft.latitud" /></label>
-      <label>Longitud <input [(ngModel)]="draft.longitud" /></label>
-    </div>
-    <div class="full-row">
-      <app-map-picker
-        [lat]="draft.latitud ? +draft.latitud : undefined"
-        [lng]="draft.longitud ? +draft.longitud : undefined"
-        (changed)="onMapChanged($event)"
-      ></app-map-picker>
-      <small>Lat: {{ draft.latitud || '-' }} | Lng: {{ draft.longitud || '-' }}</small>
-    </div>
     <label>
       Fecha programada
       <input
@@ -176,6 +164,27 @@
     <label>Codigo
       <input [value]="draft.codigo || '—'" disabled />
     </label>
+    <!-- Ubicar lat/long y mapa al final, antes de auditoría -->
+    <div class="grid-2">
+      <label>Latitud <input [(ngModel)]="draft.latitud" /></label>
+      <label>Longitud <input [(ngModel)]="draft.longitud" /></label>
+    </div>
+    <div class="full-row" style="margin-top: 4px;">
+      <button class="btn outline" type="button" (click)="mapOpen.set(!mapOpen())">
+        <span class="material-icons" aria-hidden="true">{{ mapOpen() ? 'expand_less' : 'map' }}</span>
+        {{ mapOpen() ? 'Ocultar mapa' : 'Mostrar mapa' }}
+      </button>
+    </div>
+    <!-- Mapa dentro del modal: ocupa el ancho del popup y un alto prudente -->
+    <div class="full-row" *ngIf="mapOpen()" style="grid-column: 1 / -1;">
+      <app-map-picker
+        [lat]="draft.latitud ? +draft.latitud : undefined"
+        [lng]="draft.longitud ? +draft.longitud : undefined"
+        [height]="'min(50vh, 360px)'"
+        (changed)="onMapChanged($event)"
+      ></app-map-picker>
+      <small>Lat: {{ draft.latitud || '-' }} | Lng: {{ draft.longitud || '-' }}</small>
+    </div>
     <div class="full-row" style="grid-column: 1 / -1; margin-top: 8px;">
       <hr />
       <div class="grid-2">

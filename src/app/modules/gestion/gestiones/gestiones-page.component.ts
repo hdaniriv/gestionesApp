@@ -6,6 +6,7 @@ import { AuthService } from "../../../core/auth.service";
 import { ModalComponent } from "../../../shared/modal/modal.component";
 import { ActionMenuComponent } from "../../../shared/action-menu/action-menu.component";
 import { SharedModule } from "../../../shared/shared.module";
+import { MapPickerComponent } from "../../../shared/map-picker/map-picker.component";
 import { firstValueFrom } from "rxjs";
 import { Router } from "@angular/router";
 import { NotifyService } from "../../../shared/notify/notify.service";
@@ -56,7 +57,7 @@ interface Usuario {
 @Component({
   standalone: true,
   selector: "app-gestiones-page",
-  imports: [CommonModule, FormsModule, ModalComponent, ActionMenuComponent, SharedModule],
+  imports: [CommonModule, FormsModule, ModalComponent, ActionMenuComponent, SharedModule, MapPickerComponent],
   templateUrl: "./gestiones-page.component.html",
   styleUrls: ["./gestiones-page.component.css"],
 })
@@ -77,6 +78,8 @@ export class GestionesPageComponent implements OnInit {
   draft: Gestion = { idCliente: 0, idTipoGestion: 0, direccion: "" } as any;
   asignacionOpen = signal(false);
   asignacionDraft: { idTecnico?: number; fechaInicio?: string; fechaFin?: string } = {};
+  // Mapa colapsable por defecto
+  mapOpen = signal(false);
   // Auditoría: nombre del usuario creador resuelto desde el microservicio principal
   creatorNombre = signal<string | null>(null);
   private usuarioCache = new Map<number, string>();

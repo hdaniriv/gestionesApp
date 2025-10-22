@@ -37,9 +37,21 @@ export class mainpageComponent {
   username = computed(() => this.auth.userSig()?.username || "");
   roles = computed(() => this.auth.userSig()?.roles || []);
   sidebarOpen = signal(false);
+  // Colapsado (modo escritorio): recuerda preferencia en localStorage
+  sidebarCollapsed = signal<boolean>(
+    (() => {
+      try {
+        const v = localStorage.getItem("sidebarCollapsed");
+        return v === "1";
+      } catch {
+        return false;
+      }
+    })()
+  );
   isAdmin = computed(() => this.auth.hasRole("Administrador"));
   isSupervisor = computed(() => this.auth.hasRole("Supervisor"));
-  isTecnico = computed(() => this.auth.hasRole("Técnico"));
+  // Estándar sin tilde
+  isTecnico = computed(() => this.auth.hasRole("Tecnico"));
   isCliente = computed(() => this.auth.hasRole("Cliente"));
 
   // Menú de usuario
@@ -60,6 +72,15 @@ export class mainpageComponent {
   }
   toggleSidebar() {
     this.sidebarOpen.update((v) => !v);
+  }
+  toggleSidebarCollapse() {
+    this.sidebarCollapsed.update((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem("sidebarCollapsed", next ? "1" : "0");
+      } catch {}
+      return next;
+    });
   }
   // Visibilidad por rol: Admin y Supervisor ven todo; Técnico/Cliente solo Gestiones
   showGestion() {

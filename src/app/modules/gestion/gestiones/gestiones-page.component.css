@@ -86,3 +86,5 @@ select, input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width:
   .form { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* (Removed) estilos del overlay fullscreen: el mapa ahora se muestra dentro del modal */
