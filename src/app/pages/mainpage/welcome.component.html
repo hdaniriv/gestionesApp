@@ -1,4 +1,55 @@
-<div class="welcome">
-  <h2>Bienvenido a Skynet</h2>
-  <p>Selecciona una opción del menú para comenzar.</p>
-</div>
+<ng-container *ngIf="isAdmin() || isSupervisor(); else simpleWelcome">
+  <div class="dash">
+    <div class="dash-header">
+      <h2>Resumen del mes</h2>
+      <div class="hint" *ngIf="loading()">Cargando datos…</div>
+    </div>
+    <div class="cards">
+      <div class="card kpi">
+        <div class="kpi-title">Gestiones del mes</div>
+        <div class="kpi-value">{{ resumen()?.total || 0 }}</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="material-icons">pie_chart</span>
+          Por estado
+          <span class="count-pill">{{ countEstados() }}</span>
+        </div>
+        <canvas #chartEstados></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span class="material-icons">bar_chart</span>
+          Por técnico
+          <span class="count-pill">{{ countTecnicos() }}</span>
+        </div>
+        <canvas #chartTecnicos></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span class="material-icons">insert_chart</span>
+          Por cliente
+          <span class="count-pill">{{ countClientes() }}</span>
+        </div>
+        <canvas #chartClientes></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          <span class="material-icons">stacked_bar_chart</span>
+          Estado x Técnico
+          <span class="count-pill">{{ countEstadoTecnico() }}</span>
+        </div>
+        <canvas #chartEstadoTecnico></canvas>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #simpleWelcome>
+  <div class="welcome">
+    <h2>Bienvenido a Skynet</h2>
+    <p>Selecciona una opción del menú para comenzar.</p>
+  </div>
+</ng-template>

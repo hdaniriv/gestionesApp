@@ -54,6 +54,19 @@
         </div>
   <h4>Operaciones</h4>
         <ul>
+          <li>
+            <a
+              class="nav-link"
+              routerLink="/app"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              title="Home"
+              [attr.aria-label]="sidebarCollapsed() ? 'Home' : null"
+            >
+              <span class="material-icons" aria-hidden="true">home</span>
+              <span class="label">Home</span>
+            </a>
+          </li>
           <li *ngIf="showGestion()">
             <a
               class="nav-link"
@@ -151,6 +164,21 @@
             >
               <span class="material-icons" aria-hidden="true">security</span>
               <span class="label">Roles</span>
+            </a>
+          </li>
+        </ul>
+        <h4>Sistema</h4>
+        <ul>
+          <li>
+            <a
+              class="nav-link"
+              routerLink="/app/sistema/acerca"
+              routerLinkActive="active"
+              title="Acerca de"
+              [attr.aria-label]="sidebarCollapsed() ? 'Acerca de' : null"
+            >
+              <span class="material-icons" aria-hidden="true">info</span>
+              <span class="label">Acerca de</span>
             </a>
           </li>
         </ul>

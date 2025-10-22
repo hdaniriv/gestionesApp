@@ -308,7 +308,33 @@ footer {
   .collapse-btn {
     display: none;
   }
+  /* En móvil/tablet el menú debe salir del flujo para no reservar espacio */
+  .body {
+    position: relative;
+  }
+  .side {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    /* El menú se superpone, no ocupa ancho en el layout */
+    min-width: 0;
+    width: 80vw;
+    max-width: 320px;
+    border-right: 1px solid #e0e0e0;
+    /* Mantener animación de entrada/salida */
+    transform: translateX(-100%);
+  }
   .side.open {
+    transform: translateX(0);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  /* Neutralizar estilo de colapso en móvil (no aplica) */
+  .side.collapsed {
+    width: 80vw;
+    min-width: 0;
+    max-width: 320px;
+    padding: 16px;
   }
 }

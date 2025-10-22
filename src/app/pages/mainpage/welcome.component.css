@@ -1,6 +1,24 @@
-.welcome {
-  padding: 24px;
+.welcome { padding: 24px; }
+.welcome h2 { margin: 0 0 8px 0; }
+
+.dash { padding: 12px; }
+.dash-header { display:flex; align-items:center; justify-content: space-between; margin-bottom: 12px; }
+.dash-header .hint { color:#6b7280; font-size: 14px; }
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 12px; }
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+.card.kpi { display: flex; flex-direction: column; gap: 8px; }
+.kpi-title { color:#6b7280; font-size: 14px; }
+.kpi-value { font-size: 28px; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.panel { background:#fff; border:1px solid #e5e7eb; border-radius: 10px; padding: 12px; display:flex; flex-direction: column; }
+.panel-title { display:flex; align-items:center; gap: 8px; color:#374151; font-weight: 600; margin-bottom: 8px; }
+.panel canvas { width: 100% !important; height: auto !important; display: block; }
+.count-pill { margin-left: auto; background: #f3f4f6; color: #374151; font-weight: 600; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+
+@media (max-width: 1024px) {
+  .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .grid { grid-template-columns: 1fr; }
 }
-.welcome h2 {
-  margin: 0 0 8px 0;
+@media (max-width: 640px) {
+  .cards { grid-template-columns: 1fr; }
 }

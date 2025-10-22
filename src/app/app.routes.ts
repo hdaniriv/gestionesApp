@@ -36,6 +36,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "sistema/acerca",
+        loadComponent: () =>
+          import("./pages/system/about.component").then(
+            (m) => m.AboutComponent
+          ),
+      },
+      {
         path: "gestion",
         loadChildren: () =>
           import("./modules/gestion/gestion.routes").then(

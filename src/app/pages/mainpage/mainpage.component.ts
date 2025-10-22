@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { Router, RouterLink, RouterOutlet } from "@angular/router";
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { AuthService } from "../../core/auth.service";
 import { FormsModule } from "@angular/forms";
@@ -23,6 +23,7 @@ import { NotifyService } from "../../shared/notify/notify.service";
     CommonModule,
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
     FormsModule,
     ChangePasswordDialogComponent,
   ],
