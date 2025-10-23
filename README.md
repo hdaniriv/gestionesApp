@@ -1,4 +1,4 @@
-# Skynet Gestión (Angular 20)
+# Sistema de Soporte (Angular)
 
 SPA base con módulos de Seguridad y Gestión. Incluye rutas, layout (header + menú lateral derecho + footer), páginas base y environments.
 

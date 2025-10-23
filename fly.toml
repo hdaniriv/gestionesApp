@@ -1,0 +1,18 @@
+# fly.toml para Frontend Angular con Nginx
+app = "sistema-frontend"
+primary_region = "mia"
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 75
+    soft_limit = 50
