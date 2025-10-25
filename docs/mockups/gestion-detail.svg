@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Mockup - Gestión (Detalle)</title>
+  <desc id="desc">Wireframe de detalle/edición de gestión con formulario, timeline y acciones.</desc>
+  <defs>
+    <style>
+      .frame { fill:#fff; stroke:#1f2937; stroke-width:2; }
+      .header { fill:#f8fafc; stroke:#cbd5e1; }
+      .sidebar { fill:#f1f5f9; stroke:#cbd5e1; }
+      .card { fill:#ffffff; stroke:#e2e8f0; }
+      .pill { fill:#eef2f7; stroke:#cbd5e1; }
+      .title { font:700 20px 'Segoe UI', Arial, sans-serif; fill:#1f2937; }
+      .text { font:400 14px 'Segoe UI', Arial, sans-serif; fill:#334155; }
+    </style>
+  </defs>
+
+  <rect x="20" y="20" width="1560" height="960" class="frame" rx="16" ry="16"/>
+
+  <!-- Header -->
+  <rect x="20" y="20" width="1560" height="80" class="header"/>
+  <text x="60" y="70" class="title">Gestión: COD 251234</text>
+
+  <!-- Contenido dividido -->
+  <rect x="40" y="120" width="1000" height="700" class="card" rx="12" ry="12"/>
+  <text x="60" y="150" class="text">Formulario</text>
+  <!-- Form left -->
+  <text x="60" y="190" class="text">Cliente</text>
+  <rect x="60" y="200" width="460" height="40" class="pill" rx="8" ry="8"/>
+  <text x="60" y="260" class="text">Técnico asignado</text>
+  <rect x="60" y="270" width="460" height="40" class="pill" rx="8" ry="8"/>
+  <text x="60" y="330" class="text">Estado</text>
+  <rect x="60" y="340" width="460" height="40" class="pill" rx="8" ry="8"/>
+  <text x="60" y="400" class="text">Fecha inicio</text>
+  <rect x="60" y="410" width="220" height="40" class="pill" rx="8" ry="8"/>
+  <text x="300" y="400" class="text">Fecha fin</text>
+  <rect x="300" y="410" width="220" height="40" class="pill" rx="8" ry="8"/>
+  <text x="60" y="470" class="text">Descripción</text>
+  <rect x="60" y="480" width="460" height="140" class="pill" rx="8" ry="8"/>
+
+  <!-- Form right -->
+  <text x="540" y="190" class="text">Prioridad</text>
+  <rect x="540" y="200" width="460" height="40" class="pill" rx="8" ry="8"/>
+  <text x="540" y="260" class="text">Tipo de gestión</text>
+  <rect x="540" y="270" width="460" height="40" class="pill" rx="8" ry="8"/>
+  <text x="540" y="330" class="text">Adjuntos</text>
+  <rect x="540" y="340" width="460" height="120" class="pill" rx="8" ry="8"/>
+
+  <!-- Acciones -->
+  <rect x="700" y="640" width="160" height="46" class="pill" rx="10" ry="10"/>
+  <text x="780" y="670" class="text" text-anchor="middle">Guardar</text>
+  <rect x="870" y="640" width="160" height="46" class="pill" rx="10" ry="10"/>
+  <text x="950" y="670" class="text" text-anchor="middle">Cerrar</text>
+
+  <!-- Timeline -->
+  <rect x="1060" y="120" width="500" height="700" class="card" rx="12" ry="12"/>
+  <text x="1080" y="150" class="text">Timeline</text>
+  <rect x="1080" y="170" width="460" height="42" class="pill" rx="8" ry="8"/>
+  <rect x="1080" y="216" width="460" height="42" class="pill" rx="8" ry="8"/>
+  <rect x="1080" y="262" width="460" height="42" class="pill" rx="8" ry="8"/>
+  <rect x="1080" y="308" width="460" height="42" class="pill" rx="8" ry="8"/>
+</svg>

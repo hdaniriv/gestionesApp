@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Mockup - Login</title>
+  <desc id="desc">Wireframe de la pantalla de login con logo, formulario de email y contraseña, y acciones.</desc>
+  <defs>
+    <style>
+      .frame { fill:#fff; stroke:#2c3e50; stroke-width:2; }
+      .muted { fill:#f4f6f8; stroke:#cbd5e1; }
+      .title { font:700 22px 'Segoe UI', Arial, sans-serif; fill:#2c3e50; }
+      .text { font:400 16px 'Segoe UI', Arial, sans-serif; fill:#334155; }
+      .hint { font:400 13px 'Segoe UI', Arial, sans-serif; fill:#64748b; }
+      .btn { fill:#e2e8f0; stroke:#94a3b8; }
+      .input { fill:#fff; stroke:#94a3b8; }
+    </style>
+  </defs>
+
+  <!-- Página -->
+  <rect x="20" y="20" width="1160" height="760" class="frame" rx="16" ry="16"/>
+
+  <!-- Panel central -->
+  <rect x="350" y="120" width="500" height="560" class="muted" rx="16" ry="16"/>
+
+  <!-- Logo -->
+  <rect x="500" y="160" width="200" height="60" class="btn" rx="8" ry="8"/>
+  <text x="600" y="200" class="text" text-anchor="middle">LOGO</text>
+
+  <!-- Título -->
+  <text x="600" y="250" class="title" text-anchor="middle">Iniciar sesión</text>
+
+  <!-- Email -->
+  <text x="400" y="300" class="hint">Email</text>
+  <rect x="400" y="310" width="400" height="46" class="input" rx="8" ry="8"/>
+
+  <!-- Password -->
+  <text x="400" y="380" class="hint">Contraseña</text>
+  <rect x="400" y="390" width="400" height="46" class="input" rx="8" ry="8"/>
+
+  <!-- Recordarme + Olvidé contraseña -->
+  <rect x="400" y="450" width="18" height="18" class="input" rx="4" ry="4"/>
+  <text x="426" y="464" class="hint">Recordarme</text>
+  <text x="750" y="464" class="hint" text-anchor="end">¿Olvidaste tu contraseña?</text>
+
+  <!-- Botón ingresar -->
+  <rect x="400" y="500" width="400" height="50" class="btn" rx="10" ry="10"/>
+  <text x="600" y="532" class="text" text-anchor="middle">Ingresar</text>
+
+  <!-- Pie -->
+  <text x="600" y="600" class="hint" text-anchor="middle">© 2025 Soporte | v1.0</text>
+</svg>

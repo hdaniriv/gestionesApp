@@ -21,6 +21,28 @@ SPA base con módulos de Seguridad y Gestión. Incluye rutas, layout (header + m
 - src/app/modules/seguridad: Usuarios, Roles
 - src/app/environments: environment.ts / environment.prod.ts
 
+## Mockups (Wireframes)
+
+Los siguientes mockups ilustran el diseño inicial de las pantallas principales. Se encuentran en `docs/mockups/`:
+
+- Login: `docs/mockups/login.svg`
+- Dashboard: `docs/mockups/dashboard.svg`
+- Gestiones (Lista): `docs/mockups/gestiones-list.svg`
+- Gestión (Detalle): `docs/mockups/gestion-detail.svg`
+- Usuarios (Lista): `docs/mockups/usuarios-list.svg`
+
+Vista rápida:
+
+![Login](docs/mockups/login.svg)
+
+![Dashboard](docs/mockups/dashboard.svg)
+
+![Gestiones - Lista](docs/mockups/gestiones-list.svg)
+
+![Gestión - Detalle](docs/mockups/gestion-detail.svg)
+
+![Usuarios - Lista](docs/mockups/usuarios-list.svg)
+
 ## Próximos pasos
 
 - Integrar AuthService con /api/auth/login y guardar token
