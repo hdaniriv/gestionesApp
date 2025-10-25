@@ -43,13 +43,4 @@ Vista rápida:
 
 ![Usuarios - Lista](docs/mockups/usuarios-list.svg)
 
-## Próximos pasos
 
-- Integrar AuthService con /api/auth/login y guardar token
-- Implementar guards por rol y menú dinámico
-- Crear componentes reutilizables (tabla, modal, menú contextual)
-- Conectar a endpoints del gateway para CRUD
-
-## Notas sobre Gestiones (UI)
-
-- La lista y el detalle de Gestiones muestran el campo `Codigo` (YYNNNN), de solo lectura, provisto por el backend al crear la gestión.
